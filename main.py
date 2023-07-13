@@ -115,7 +115,10 @@ class PresupuestoApp:
         pass
 
     def agregar_producto_clicked(self):
-        pass
+        subventana = Toplevel(self.root)
+        subventana.title("Agregar Producto")
+        
+        
 
     def guardar_pedido_clicked(self):
         pass
