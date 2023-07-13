@@ -60,7 +60,9 @@ class PresupuestoApp:
         btn_agregar_producto = tk.Button(frame1, text='Agregar Producto', command=self.agregar_producto_clicked)
         btn_agregar_producto.grid(column=4, row=1)
 
-        Label(frame1, text='Total:', font=('Arial', 12, 'bold'), anchor="w").grid(column=0, row=3)
+        self.total_guarani = 0
+        self.total_label = Label(frame1, text=f'Total: {self.total_guarani}', font=('Arial', 12, 'bold'), anchor="w")
+        self.total_label.grid(column=0, row=3)
         btn_guardar_pedido = tk.Button(frame1, text='Guardar', command=self.guardar_pedido_clicked)
         btn_guardar_pedido.grid(column=2, row=3)
 
@@ -155,7 +157,9 @@ class PresupuestoApp:
 
         # Insertar los valores en el Treeview
             self.tree.insert('', END, values=(codigo_val, cantidad_val, producto_val, precio_guarani_val, precio_dolar_val))
-
+            # Actualizar el total
+            self.total_guarani += float(precio_guarani_val)
+            self.total_label.config(text=f'Total: {self.total_guarani}')
         # Cerrar la ventana
             top.destroy()
 
