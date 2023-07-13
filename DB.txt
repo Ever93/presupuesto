@@ -1,0 +1,77 @@
+import sqlite3
+
+# Conectar a la base de datos (se creará si no existe)
+conn = sqlite3.connect('crm.db')
+
+# Crear un cursor para ejecutar comandos SQL
+c = conn.cursor()
+
+# Crear la tabla 'Empresas'
+c.execute('''
+    CREATE TABLE IF NOT EXISTS Empresas (
+        id_empresa INTEGER PRIMARY KEY AUTOINCREMENT,
+        nombre TEXT NOT NULL,
+        telefono TEXT,
+        direccion TEXT
+    )
+''')
+
+# Crear la tabla 'Clientes'
+c.execute('''
+    CREATE TABLE IF NOT EXISTS Clientes (
+        id_cliente INTEGER PRIMARY KEY AUTOINCREMENT,
+        nombre TEXT NOT NULL,
+        telefono TEXT
+    )
+''')
+
+# Crear la tabla 'Productos'
+c.execute('''
+    CREATE TABLE IF NOT EXISTS Productos (
+        id_producto INTEGER PRIMARY KEY AUTOINCREMENT,
+        codigo TEXT,
+        nombre TEXT,
+        precio_dolar REAL
+    )
+''')
+
+# Crear la tabla 'Cotizaciones'
+c.execute('''
+    CREATE TABLE IF NOT EXISTS Cotizaciones (
+        id_cotizacion INTEGER PRIMARY KEY AUTOINCREMENT,
+        fecha DATE,
+        valor_dolar REAL
+    )
+''')
+
+# Crear la tabla 'Presupuestos'
+c.execute('''
+    CREATE TABLE IF NOT EXISTS Presupuestos (
+        id_presupuesto INTEGER PRIMARY KEY AUTOINCREMENT,
+        id_cliente INTEGER,
+        id_cotizacion INTEGER,
+        fecha DATE,
+        precio_total REAL,
+        cuotas INTEGER,
+        FOREIGN KEY (id_cliente) REFERENCES Clientes (id_cliente),
+        FOREIGN KEY (id_cotizacion) REFERENCES Cotizaciones (id_cotizacion)
+    )
+''')
+
+# Crear la tabla 'DetallePresupuesto'
+c.execute('''
+    CREATE TABLE IF NOT EXISTS DetallePresupuesto (
+        id_detalle INTEGER PRIMARY KEY AUTOINCREMENT,
+        id_presupuesto INTEGER,
+        id_producto INTEGER,
+        cantidad INTEGER,
+        porcentaje_ganancia REAL,
+        precio_final REAL,
+        FOREIGN KEY (id_presupuesto) REFERENCES Presupuestos (id_presupuesto),
+        FOREIGN KEY (id_producto) REFERENCES Productos (id_producto)
+    )
+''')
+
+# Guardar los cambios y cerrar la conexión
+conn.commit()
+conn.close()
