@@ -115,9 +115,36 @@ class PresupuestoApp:
         pass
 
     def agregar_producto_clicked(self):
-        subventana = Toplevel(self.root)
-        subventana.title("Agregar Producto")
+        top = Toplevel()
+        top.title('Cargar producto')
+        #ancho por alto
+        top.geometry('350x130')
+
+        lcodigo = Label(top, text='Codigo')
+        codigo = Entry(top, width=40)
+        lcodigo.grid(row=0, column=0)
+        codigo.grid(row=0, column=1)
+
+        lcantidad = Label(top, text='Cantidad')
+        cantidad = Entry(top, width=40)
+        lcantidad.grid(row=1, column=0)
+        cantidad.grid(row=1, column=1)
         
+        lproducto = Label(top, text='Producto')
+        producto = Entry(top, width=40)
+        lproducto.grid(row=2, column=0)
+        producto.grid(row=2, column=1)
+        
+        lprecio_dolar = Label(top, text='Precio Dolar')
+        precio_dolar = Entry(top, width=40)
+        lprecio_dolar.grid(row=3, column=0)
+        precio_dolar.grid(row=3, column=1)
+
+        guardar = Button(top, text='Guardar', command='')
+        guardar.grid(row=4, column=1)
+
+            # Creamos el main loop para nuestra segunda ventana
+        top.mainloop()
         
 
     def guardar_pedido_clicked(self):
