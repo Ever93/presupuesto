@@ -145,7 +145,7 @@ class PresupuestoApp:
         lprecio_guarani.grid(row=4, column=0)
         precio_guarani.grid(row=4, column=1)
         
-        def guardar():
+        def cargar():
         # Obtener los valores de los campos
             codigo_val = codigo.get()
             cantidad_val = cantidad.get()
@@ -159,8 +159,8 @@ class PresupuestoApp:
         # Cerrar la ventana
             top.destroy()
 
-        guardar = Button(top, text='Guardar', command=guardar)
-        guardar.grid(row=5, column=1)
+        btn_cargar = Button(top, text='Cargar', command=cargar)
+        btn_cargar.grid(row=5, column=1)
 
             # Creamos el main loop para nuestra segunda ventana
         top.mainloop()
