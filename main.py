@@ -118,7 +118,7 @@ class PresupuestoApp:
         top = Toplevel()
         top.title('Cargar producto')
         #ancho por alto
-        top.geometry('350x130')
+        top.geometry('350x140')
 
         lcodigo = Label(top, text='Codigo')
         codigo = Entry(top, width=40)
@@ -139,9 +139,28 @@ class PresupuestoApp:
         precio_dolar = Entry(top, width=40)
         lprecio_dolar.grid(row=3, column=0)
         precio_dolar.grid(row=3, column=1)
+        
+        lprecio_guarani = Label(top, text='Precio Guarani')
+        precio_guarani = Entry(top, width=40)
+        lprecio_guarani.grid(row=4, column=0)
+        precio_guarani.grid(row=4, column=1)
+        
+        def guardar():
+        # Obtener los valores de los campos
+            codigo_val = codigo.get()
+            cantidad_val = cantidad.get()
+            producto_val = producto.get()
+            precio_dolar_val = precio_dolar.get()
+            precio_guarani_val = precio_guarani.get()
 
-        guardar = Button(top, text='Guardar', command='')
-        guardar.grid(row=4, column=1)
+        # Insertar los valores en el Treeview
+            self.tree.insert('', END, values=(codigo_val, cantidad_val, producto_val, precio_guarani_val, precio_dolar_val))
+
+        # Cerrar la ventana
+            top.destroy()
+
+        guardar = Button(top, text='Guardar', command=guardar)
+        guardar.grid(row=5, column=1)
 
             # Creamos el main loop para nuestra segunda ventana
         top.mainloop()
