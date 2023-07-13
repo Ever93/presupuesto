@@ -4,6 +4,7 @@ import tkinter as tk
 import subprocess
 from tkinter import ttk
 from ventana2 import CRMApp
+import locale
 
 class PresupuestoApp:
     def __init__(self, root):
@@ -163,7 +164,9 @@ class PresupuestoApp:
             if self.total_guarani == 0:
                 self.total_label.config(text='Total: ')
             else:
-                total_formatted = '{:,.0f}'.format(self.total_guarani)
+                locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')  # Establecer la configuración regional a en_US.UTF-8
+                total_formatted = locale.format_string('%.0f', self.total_guarani, grouping=True)
+                total_formatted = total_formatted.replace(',', '.')  # Reemplazar la coma por un punto
                 self.total_label.config(text=f'Total: {total_formatted}')
         # Cerrar la ventana
             top.destroy()
