@@ -49,11 +49,13 @@ class PresupuestoApp:
 
         btn_dolar = tk.Button(frame1, text='Dolar', command=self.dolar_clicked)
         btn_dolar.grid(column=1, row=1)
-        Label(frame1, text='Cotizacion:').grid(column=1, row=0)
+        self.lbl_cotizacion = Label(frame1, text='Cotización: ')
+        self.lbl_cotizacion.grid(column=1, row=0)
 
         btn_porcentaje = tk.Button(frame1, text='%', command=self.porcentaje_clicked)
         btn_porcentaje.grid(column=2, row=1)
-        Label(frame1, text='Interes:').grid(column=2, row=0)
+        self.lbl_interes = Label(frame1, text='Interés:')
+        self.lbl_interes.grid(column=2, row=0)
 
         btn_eliminar_producto = tk.Button(frame1, text='Eliminar Producto', command=self.eliminar_producto_clicked)
         btn_eliminar_producto.grid(column=3, row=1)
@@ -107,12 +109,38 @@ class PresupuestoApp:
 
     def opcion_empresa(self):
         pass
-
+#funcion para cargar cotizacion del dolar
     def dolar_clicked(self):
-        pass
+        top = tk.Toplevel()
+        top.title('Cargar Cotización')
+        top.geometry('250x100')
+
+        lbl_cotizacion = tk.Label(top, text='Cotización:')
+        lbl_cotizacion.pack()
+
+        entry_cotizacion = tk.Entry(top)
+        entry_cotizacion.pack()
+
+        btn_guardar = tk.Button(top, text='Guardar', command=lambda: self.guardar_cotizacion(entry_cotizacion.get(), top))
+        btn_guardar.pack()
+
+        top.mainloop()
 
     def porcentaje_clicked(self):
-        pass
+        top = tk.Toplevel()
+        top.title('Cargar Porcentaje')
+        top.geometry('250x100')
+
+        lbl_porcentaje = tk.Label(top, text='Porcentaje:')
+        lbl_porcentaje.pack()
+
+        entry_porcentaje = tk.Entry(top)
+        entry_porcentaje.pack()
+
+        btn_guardar = tk.Button(top, text='Guardar', command=lambda: self.guardar_porcentaje(entry_porcentaje.get(), top))
+        btn_guardar.pack()
+
+        top.mainloop()
 
     def eliminar_producto_clicked(self):
         pass
@@ -187,6 +215,16 @@ class PresupuestoApp:
     def generar_presupuesto_clicked(self):
         pass
 
+#funcion que se encarga de cargar la cotizacion en la etiqueta
+    def guardar_cotizacion(self, cotizacion, top):
+        self.lbl_cotizacion.config(text='Cotización: ' + cotizacion)
+        top.destroy()
+        
+#Funcion que se encargar de cargar el porcentaje   
+    def guardar_porcentaje(self, porcentaje, top):
+        self.lbl_interes.config(text='Interés: ' + porcentaje + '%')
+        top.destroy()
+        
 root = Tk()
 app = PresupuestoApp(root)
 root.mainloop()
