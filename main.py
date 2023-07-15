@@ -204,9 +204,13 @@ class PresupuestoApp:
             if precio_guarani_val:
                 self.total_guarani += costo_total_guarani
                 # Formatear el valor de la columna "Dolar" con dos decimales
-            dolar_formatted = f"{precio_dolar_val:.2f}"
-            # Insertar los valores en el Treeview
-            self.tree.insert('', END, values=(codigo_val, cantidad_val, producto_val, costo_total_guarani, f"{precio_dolar_val:.2f}"))
+            # Formatear el valor de costo_total_guarani con separador de miles y sin decimales
+            costo_total_guarani_formatted = locale.format_string("%d", costo_total_guarani, grouping=True)
+
+        # Insertar los valores en el Treeview
+            self.tree.insert('', END, values=(codigo_val, cantidad_val, producto_val, costo_total_guarani_formatted, f"{precio_dolar_val:.2f}"))
+
+        # Resto del código...
 
             # Actualizar el total
             self.actualizar_total()
