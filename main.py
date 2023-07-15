@@ -177,6 +177,8 @@ class PresupuestoApp:
         precio_guarani.grid(row=4, column=1)
         
         def cargar():
+            
+            
             # Obtener los valores de los campos
             codigo_val = codigo.get()
             cantidad_val = cantidad.get()
@@ -198,22 +200,19 @@ class PresupuestoApp:
             costo_total_guarani = costo_venta * cantidad_val  # Calcular el costo total en guaraníes
 
             if precio_guarani_val:
-                self.total_guarani += precio_guarani_val * cantidad_val
+                self.total_guarani += costo_total_guarani
 
             # Insertar los valores en el Treeview
             self.tree.insert('', END, values=(codigo_val, cantidad_val, producto_val, costo_total_guarani, precio_dolar_val))
 
             # Actualizar el total
-            if self.total_guarani == 0:
-                self.total_label.config(text='Total: ')
-            else:
-                locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
-                total_formatted = locale.format_string('%.0f', self.total_guarani, grouping=True)
-                total_formatted = total_formatted.replace(',', '.')
-                self.total_label.config(text=f'Total: {total_formatted}')
+            self.actualizar_total()
 
             # Cerrar la ventana
             top.destroy()
+
+
+
 
 
         btn_cargar = Button(top, text='Cargar', command=cargar)
@@ -222,6 +221,11 @@ class PresupuestoApp:
             # Creamos el main loop para nuestra segunda ventana
         top.mainloop()
         
+    def actualizar_total(self):
+        total_guarani = sum(float(self.tree.item(item)['values'][3]) for item in self.tree.get_children())
+        total_formatted = locale.format_string('%.0f', total_guarani, grouping=True)
+        total_formatted = total_formatted.replace(',', '.')
+        self.total_label.config(text=f'Total: {total_formatted}')  
 
     def guardar_pedido_clicked(self):
         pass
