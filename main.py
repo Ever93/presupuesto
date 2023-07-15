@@ -94,6 +94,8 @@ class PresupuestoApp:
         self.tree.heading('Producto', text='Producto')
         self.tree.heading('Guarani', text='Guarani')
         self.tree.heading('Dolar', text='Dolar')
+        
+        
 
         self.tree.pack()
 
@@ -201,9 +203,10 @@ class PresupuestoApp:
 
             if precio_guarani_val:
                 self.total_guarani += costo_total_guarani
-
+                # Formatear el valor de la columna "Dolar" con dos decimales
+            dolar_formatted = f"{precio_dolar_val:.2f}"
             # Insertar los valores en el Treeview
-            self.tree.insert('', END, values=(codigo_val, cantidad_val, producto_val, costo_total_guarani, precio_dolar_val))
+            self.tree.insert('', END, values=(codigo_val, cantidad_val, producto_val, costo_total_guarani, f"{precio_dolar_val:.2f}"))
 
             # Actualizar el total
             self.actualizar_total()
