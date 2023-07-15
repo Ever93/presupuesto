@@ -177,7 +177,7 @@ class PresupuestoApp:
         precio_guarani.grid(row=4, column=1)
         
         def cargar():
-        # Obtener los valores de los campos
+            # Obtener los valores de los campos
             codigo_val = codigo.get()
             cantidad_val = cantidad.get()
             producto_val = producto.get()
@@ -188,7 +188,8 @@ class PresupuestoApp:
             cotizacion = float(self.lbl_cotizacion.cget("text").split(': ')[1])  # Obtener el valor de la cotización
             porcentaje = float(self.lbl_interes.cget("text").split(': ')[1].strip('%'))  # Obtener el valor del porcentaje
 
-            precio_dolar_val = float(precio_dolar_val)  # Convertir el precio en dólares a un número
+            precio_dolar_val = float(precio_dolar_val) if precio_dolar_val else 0.0  # Convertir el precio en dólares a un número
+            precio_guarani_val = float(precio_guarani_val) if precio_guarani_val else 0.0  # Convertir el precio en guaraníes a un número
             cantidad_val = int(cantidad_val)  # Convertir la cantidad a un número entero
 
             costo_venta = (precio_dolar_val * cotizacion) * (1 + (porcentaje / 100))  # Calcular el costo de venta
@@ -196,23 +197,24 @@ class PresupuestoApp:
 
             costo_total_guarani = costo_venta * cantidad_val  # Calcular el costo total en guaraníes
 
+            if precio_guarani_val:
+                self.total_guarani += precio_guarani_val * cantidad_val
+
             # Insertar los valores en el Treeview
             self.tree.insert('', END, values=(codigo_val, cantidad_val, producto_val, costo_total_guarani, precio_dolar_val))
 
-        # Insertar los valores en el Treeview
-            self.tree.insert('', END, values=(codigo_val, cantidad_val, producto_val, precio_guarani_val, precio_dolar_val))
             # Actualizar el total
-            self.total_guarani += float(precio_guarani_val)
-            #prueba
             if self.total_guarani == 0:
                 self.total_label.config(text='Total: ')
             else:
-                locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')  # Establecer la configuración regional a en_US.UTF-8
+                locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
                 total_formatted = locale.format_string('%.0f', self.total_guarani, grouping=True)
-                total_formatted = total_formatted.replace(',', '.')  # Reemplazar la coma por un punto
+                total_formatted = total_formatted.replace(',', '.')
                 self.total_label.config(text=f'Total: {total_formatted}')
-        # Cerrar la ventana
+
+            # Cerrar la ventana
             top.destroy()
+
 
         btn_cargar = Button(top, text='Cargar', command=cargar)
         btn_cargar.grid(row=5, column=1)
