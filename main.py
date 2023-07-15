@@ -184,6 +184,21 @@ class PresupuestoApp:
             precio_dolar_val = precio_dolar.get()
             precio_guarani_val = precio_guarani.get()
 
+            # Cálculos
+            cotizacion = float(self.lbl_cotizacion.cget("text").split(': ')[1])  # Obtener el valor de la cotización
+            porcentaje = float(self.lbl_interes.cget("text").split(': ')[1].strip('%'))  # Obtener el valor del porcentaje
+
+            precio_dolar_val = float(precio_dolar_val)  # Convertir el precio en dólares a un número
+            cantidad_val = int(cantidad_val)  # Convertir la cantidad a un número entero
+
+            costo_venta = (precio_dolar_val * cotizacion) * (1 + (porcentaje / 100))  # Calcular el costo de venta
+            costo_venta = round(costo_venta, 2)  # Redondear el costo de venta a 2 decimales
+
+            costo_total_guarani = costo_venta * cantidad_val  # Calcular el costo total en guaraníes
+
+            # Insertar los valores en el Treeview
+            self.tree.insert('', END, values=(codigo_val, cantidad_val, producto_val, costo_total_guarani, precio_dolar_val))
+
         # Insertar los valores en el Treeview
             self.tree.insert('', END, values=(codigo_val, cantidad_val, producto_val, precio_guarani_val, precio_dolar_val))
             # Actualizar el total
