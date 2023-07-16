@@ -6,6 +6,9 @@ import subprocess
 from tkinter import ttk
 from ventana2 import CRMApp
 import locale
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from tkinter import filedialog
 
 def conectar():
     conn = sqlite3.connect('crm.db')
@@ -30,6 +33,7 @@ class PresupuestoApp:
 
         self.create_menu()
         self.create_widgets()
+        
 
     def create_menu(self):
         menu_bar = tk.Menu(self.root)
@@ -49,6 +53,7 @@ class PresupuestoApp:
         self.root.config(menu=menu_bar)
 
     def create_widgets(self):
+        
         frame = tk.Frame(self.root)
         frame.pack()
         Label(frame, text='Sistema', font=('Arial', 14, 'bold'), anchor="w").grid(column=0, row=0)
@@ -64,12 +69,9 @@ class PresupuestoApp:
         combo_label.pack(side=tk.LEFT)
         combo = ttk.Combobox(combo_frame, values=nombres_clientes)
         combo.pack(side=tk.LEFT)
-
-
-
+        self.combo = combo  # Almacenar el Combobox en el atributo
 # Configurar los nombres en el combobox
         combo['values'] = nombres_clientes
-
         combo.pack(side=tk.LEFT)
 
         btn_dolar = tk.Button(frame1, text='Dolar', command=self.dolar_clicked)
@@ -119,9 +121,6 @@ class PresupuestoApp:
         self.tree.heading('Producto', text='Producto')
         self.tree.heading('Guarani', text='Guarani')
         self.tree.heading('Dolar', text='Dolar')
-        
-        
-
         self.tree.pack()
 
     def abrir_explorador_archivos(self):
@@ -150,7 +149,6 @@ class PresupuestoApp:
 
         btn_guardar = tk.Button(top, text='Guardar', command=lambda: self.guardar_cotizacion(entry_cotizacion.get(), top))
         btn_guardar.pack()
-
         top.mainloop()
 
     def porcentaje_clicked(self):
@@ -210,7 +208,6 @@ class PresupuestoApp:
             producto_val = producto.get()
             precio_dolar_val = precio_dolar.get()
             precio_guarani_val = precio_guarani.get()
-
             # Cálculos
             cotizacion = float(self.lbl_cotizacion.cget("text").split(': ')[1])  # Obtener el valor de la cotización
             porcentaje = float(self.lbl_interes.cget("text").split(': ')[1].strip('%'))  # Obtener el valor del porcentaje
@@ -226,18 +223,14 @@ class PresupuestoApp:
 
             if precio_guarani_val:
                 self.total_guarani += costo_total_guarani
-        # Formatear el valor de la columna "Dolar" con dos decimales
     # Formatear el valor de costo_total_guarani con separador de miles y sin decimales
             costo_total_guarani_str = locale.format_string("%.0f", costo_total_guarani, grouping=True)
             costo_total_guarani_str = costo_total_guarani_str.replace(',', '.')
             costo_total_guarani_float = float(costo_total_guarani_str)
-
     # Insertar los valores en el Treeview
             self.tree.insert('', END, values=(codigo_val, cantidad_val, producto_val, costo_total_guarani_str, f"{precio_dolar_val:.2f}"))
-
             # Actualizar el total
             self.actualizar_total()
-
             # Cerrar la ventana
             top.destroy()
 
@@ -259,7 +252,52 @@ class PresupuestoApp:
         pass
 
     def generar_presupuesto_clicked(self):
-        pass
+        # Obtener el nombre del cliente seleccionado del Combobox
+        cliente = self.combo.get()
+        # Solicitar la ubicación y el nombre del archivo
+        file_path = filedialog.asksaveasfilename(defaultextension=".pdf", filetypes=[("PDF Files", "*.pdf")])
+        if not file_path:
+            return  # El usuario canceló la selección o no ingresó un nombre de archivo
+
+    # Crear el lienzo del PDF
+        pdf = canvas.Canvas(file_path, pagesize=letter)
+
+
+    # Configuración de fuentes
+        pdf.setFont("Times-Bold", 14)
+        pdf.setFont("Times-Bold", 12)
+
+    # Título
+        pdf.drawCentredString(300, 700, "Presupuesto Equipo de Computo")
+
+    # Cliente
+        pdf.setFont("Times-Bold", 12)
+        pdf.drawString(50, 650, f"Cliente: {cliente}")
+
+
+    # Subtítulo Equipo
+        pdf.setFont("Times-Bold", 12)
+        pdf.drawString(50, 620, "Equipo")
+
+    # Obtener los productos del Treeview
+        productos = [self.tree.set(item, "Producto") for item in self.tree.get_children()]
+
+    # Imprimir los productos como párrafos
+        y = 600
+        for producto in productos:
+            pdf.setFont("Times-Bold", 12)
+            pdf.drawString(70, y, producto)
+            y -= 20
+
+    # Precio total
+        pdf.drawString(50, y - 40, "Precio:")
+        total = self.total_label.cget("text").split(": ")[1]
+        pdf.drawString(100, y - 40, total + " contado con IVA incluido")
+
+    # Guardar el PDF y cerrar el lienzo
+        pdf.save()
+        # Mostrar mensaje de éxito
+        messagebox.showinfo("PDF Generado", "El PDF se generó correctamente.")
 
 #funcion que se encarga de cargar la cotizacion en la etiqueta
     def guardar_cotizacion(self, cotizacion, top):
@@ -270,8 +308,6 @@ class PresupuestoApp:
     def guardar_porcentaje(self, porcentaje, top):
         self.lbl_interes.config(text='Interés: ' + porcentaje + '%')
         top.destroy()
-        
-    
         
 root = Tk()
 app = PresupuestoApp(root)
