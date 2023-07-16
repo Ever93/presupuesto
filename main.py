@@ -6,6 +6,10 @@ from tkinter import ttk
 from ventana2 import CRMApp
 import locale
 
+
+# Establecer la configuración local para el separador de miles
+locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
+
 class PresupuestoApp:
     def __init__(self, root):
         self.root = root
@@ -180,7 +184,6 @@ class PresupuestoApp:
         
         def cargar():
             
-            
             # Obtener los valores de los campos
             codigo_val = codigo.get()
             cantidad_val = cantidad.get()
@@ -203,12 +206,16 @@ class PresupuestoApp:
 
             if precio_guarani_val:
                 self.total_guarani += costo_total_guarani
-                # Formatear el valor de la columna "Dolar" con dos decimales
-            # Formatear el valor de costo_total_guarani con separador de miles y sin decimales
-            costo_total_guarani_formatted = locale.format_string("%d", costo_total_guarani, grouping=True)
+        # Formatear el valor de la columna "Dolar" con dos decimales
+    # Formatear el valor de costo_total_guarani con separador de miles y sin decimales
+            costo_total_guarani_str = locale.format_string("%.0f", costo_total_guarani, grouping=True)
+            costo_total_guarani_str = costo_total_guarani_str.replace(',', '.')
+            costo_total_guarani_float = float(costo_total_guarani_str)
 
-        # Insertar los valores en el Treeview
-            self.tree.insert('', END, values=(codigo_val, cantidad_val, producto_val, costo_total_guarani_formatted, f"{precio_dolar_val:.2f}"))
+    # Insertar los valores en el Treeview
+            self.tree.insert('', END, values=(codigo_val, cantidad_val, producto_val, costo_total_guarani_str, f"{precio_dolar_val:.2f}"))
+
+    # Resto del código...
 
         # Resto del código...
 
@@ -229,10 +236,13 @@ class PresupuestoApp:
         top.mainloop()
         
     def actualizar_total(self):
-        total_guarani = sum(float(self.tree.item(item)['values'][3]) for item in self.tree.get_children())
-        total_formatted = locale.format_string('%.0f', total_guarani, grouping=True)
-        total_formatted = total_formatted.replace(',', '.')
-        self.total_label.config(text=f'Total: {total_formatted}')  
+        total_guarani = sum(float(self.tree.item(item)['values'][3].replace(',', '.')) for item in self.tree.get_children())
+        total_formatted = '{:,.3f}'.format(total_guarani).replace(',', '.')
+        self.total_label.config(text=f'Total: {total_formatted}')
+
+
+
+ 
 
     def guardar_pedido_clicked(self):
         pass
