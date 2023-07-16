@@ -9,6 +9,7 @@ import locale
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from tkinter import filedialog
+import datetime
 
 def conectar():
     conn = sqlite3.connect('crm.db')
@@ -254,8 +255,13 @@ class PresupuestoApp:
     def generar_presupuesto_clicked(self):
         # Obtener el nombre del cliente seleccionado del Combobox
         cliente = self.combo.get()
+        # Obtener la fecha actual
+        fecha_actual = datetime.datetime.now().strftime("%Y-%m-%d")
+         # Sugerir el nombre de archivo con la fecha y el nombre del cliente
+        nombre_archivo = f"Presupuesto_{cliente}_{fecha_actual}.pdf"
         # Solicitar la ubicación y el nombre del archivo
-        file_path = filedialog.asksaveasfilename(defaultextension=".pdf", filetypes=[("PDF Files", "*.pdf")])
+        file_path = filedialog.asksaveasfilename(defaultextension=".pdf", filetypes=[("PDF Files", "*.pdf")],
+                                             initialfile=nombre_archivo)
         if not file_path:
             return  # El usuario canceló la selección o no ingresó un nombre de archivo
 
