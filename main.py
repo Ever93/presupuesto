@@ -1,3 +1,4 @@
+import sqlite3
 from tkinter import *
 from tkinter import messagebox
 import tkinter as tk
@@ -6,6 +7,17 @@ from tkinter import ttk
 from ventana2 import CRMApp
 import locale
 
+def conectar():
+    conn = sqlite3.connect('crm.db')
+    c = conn.cursor()
+    return conn, c
+
+def obtener_nombres_clientes():
+    conn, c = conectar()
+    c.execute("SELECT nombre FROM clientes")
+    nombres = c.fetchall()
+    conn.close()
+    return nombres
 
 # Establecer la configuración local para el separador de miles
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
@@ -44,11 +56,20 @@ class PresupuestoApp:
         frame1 = tk.LabelFrame(self.root, text='Presupuesto', padx=10, pady=10, borderwidth=5)
         frame1.pack(padx=10, pady=10)
 
+        nombres_clientes = obtener_nombres_clientes()
+
         combo_frame = tk.Frame(frame1)
         combo_frame.grid(column=0, row=1)
         combo_label = ttk.Label(combo_frame, text='Cliente')
         combo_label.pack(side=tk.LEFT)
-        combo = ttk.Combobox(combo_frame)
+        combo = ttk.Combobox(combo_frame, values=nombres_clientes)
+        combo.pack(side=tk.LEFT)
+
+
+
+# Configurar los nombres en el combobox
+        combo['values'] = nombres_clientes
+
         combo.pack(side=tk.LEFT)
 
         btn_dolar = tk.Button(frame1, text='Dolar', command=self.dolar_clicked)
@@ -182,8 +203,7 @@ class PresupuestoApp:
         lprecio_guarani.grid(row=4, column=0)
         precio_guarani.grid(row=4, column=1)
         
-        def cargar():
-            
+        def cargar():          
             # Obtener los valores de los campos
             codigo_val = codigo.get()
             cantidad_val = cantidad.get()
@@ -215,19 +235,11 @@ class PresupuestoApp:
     # Insertar los valores en el Treeview
             self.tree.insert('', END, values=(codigo_val, cantidad_val, producto_val, costo_total_guarani_str, f"{precio_dolar_val:.2f}"))
 
-    # Resto del código...
-
-        # Resto del código...
-
             # Actualizar el total
             self.actualizar_total()
 
             # Cerrar la ventana
             top.destroy()
-
-
-
-
 
         btn_cargar = Button(top, text='Cargar', command=cargar)
         btn_cargar.grid(row=5, column=1)
@@ -239,10 +251,6 @@ class PresupuestoApp:
         total_guarani = sum(float(self.tree.item(item)['values'][3].replace(',', '.')) for item in self.tree.get_children())
         total_formatted = '{:,.3f}'.format(total_guarani).replace(',', '.')
         self.total_label.config(text=f'Total: {total_formatted}')
-
-
-
- 
 
     def guardar_pedido_clicked(self):
         pass
@@ -262,6 +270,8 @@ class PresupuestoApp:
     def guardar_porcentaje(self, porcentaje, top):
         self.lbl_interes.config(text='Interés: ' + porcentaje + '%')
         top.destroy()
+        
+    
         
 root = Tk()
 app = PresupuestoApp(root)
