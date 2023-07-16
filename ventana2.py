@@ -14,10 +14,12 @@ from tkinter import filedialog
 from database import conectar, crear_tablas
 
 class CRMApp(Tk):
-    def __init__(self):
+    def __init__(self, parent):
         super().__init__()
         self.title('CRM')
-
+        self.parent = parent  # Almacenar una referencia al objeto PresupuestoApp
+        # Resto del código...
+        
         crear_tablas()
         self.conn, self.c = conectar()
 
@@ -32,6 +34,7 @@ class CRMApp(Tk):
                     INSERT INTO clientes (nombre, telefono) VALUES (?, ?)
                     """, (clientes['nombre'], clientes['telefono']))
             self.conn.commit()
+            self.parent.actualizar_nombres_clientes()
             render_clientes()
 
         def nuevo_cliente():

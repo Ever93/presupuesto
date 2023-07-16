@@ -34,7 +34,7 @@ class PresupuestoApp:
 
         self.create_menu()
         self.create_widgets()
-        
+        self.render_clientes()
 
     def create_menu(self):
         menu_bar = tk.Menu(self.root)
@@ -62,19 +62,13 @@ class PresupuestoApp:
         frame1 = tk.LabelFrame(self.root, text='Presupuesto', padx=10, pady=10, borderwidth=5)
         frame1.pack(padx=10, pady=10)
 
-        nombres_clientes = obtener_nombres_clientes()
-
         combo_frame = tk.Frame(frame1)
         combo_frame.grid(column=0, row=1)
         combo_label = ttk.Label(combo_frame, text='Cliente')
         combo_label.pack(side=tk.LEFT)
-        combo = ttk.Combobox(combo_frame, values=nombres_clientes)
-        combo.pack(side=tk.LEFT)
-        self.combo = combo  # Almacenar el Combobox en el atributo
-# Configurar los nombres en el combobox
-        combo['values'] = nombres_clientes
-        combo.pack(side=tk.LEFT)
-
+        self.combo = ttk.Combobox(combo_frame, values=[])  # Utiliza self.combo directamente
+        self.combo.pack(side=tk.LEFT)
+        
         btn_dolar = tk.Button(frame1, text='Dolar', command=self.dolar_clicked)
         btn_dolar.grid(column=1, row=1)
         self.lbl_cotizacion = Label(frame1, text='Cotización: ')
@@ -124,19 +118,22 @@ class PresupuestoApp:
         self.tree.heading('Dolar', text='Dolar')
         self.tree.pack()
 
+    def render_clientes(self):
+        nombres_clientes = obtener_nombres_clientes()
+        self.combo['values'] = nombres_clientes
+
     def abrir_explorador_archivos(self):
         subprocess.run(["explorer.exe"])
         
     def abrir_ventana_crm(self):
-        self.crm_app = CRMApp()  # Crear una instancia de CRMApp
+        self.crm_app = CRMApp(self)  # Pasar self como argumento
+        self.actualizar_nombres_clientes()  # Actualizar los nombres de clientes en el Combobox
         self.crm_app.mainloop()  # Mostrar la ventana CRMApp
 
-    def opcion_cliente(self):
-        pass
 
     def opcion_empresa(self):
         pass
-#funcion para cargar cotizacion del dolar
+    
     def dolar_clicked(self):
         top = tk.Toplevel()
         top.title('Cargar Cotización')
@@ -174,7 +171,6 @@ class PresupuestoApp:
     def agregar_producto_clicked(self):
         top = Toplevel()
         top.title('Cargar producto')
-        #ancho por alto
         top.geometry('350x140')
 
         lcodigo = Label(top, text='Codigo')
@@ -202,7 +198,7 @@ class PresupuestoApp:
         lprecio_guarani.grid(row=4, column=0)
         precio_guarani.grid(row=4, column=1)
         
-        def cargar():          
+        def cargar():
             # Obtener los valores de los campos
             codigo_val = codigo.get()
             cantidad_val = cantidad.get()
@@ -224,11 +220,11 @@ class PresupuestoApp:
 
             if precio_guarani_val:
                 self.total_guarani += costo_total_guarani
-    # Formatear el valor de costo_total_guarani con separador de miles y sin decimales
+            # Formatear el valor de costo_total_guarani con separador de miles y sin decimales
             costo_total_guarani_str = locale.format_string("%.0f", costo_total_guarani, grouping=True)
             costo_total_guarani_str = costo_total_guarani_str.replace(',', '.')
             costo_total_guarani_float = float(costo_total_guarani_str)
-    # Insertar los valores en el Treeview
+            # Insertar los valores en el Treeview
             self.tree.insert('', END, values=(codigo_val, cantidad_val, producto_val, costo_total_guarani_str, f"{precio_dolar_val:.2f}"))
             # Actualizar el total
             self.actualizar_total()
@@ -238,9 +234,9 @@ class PresupuestoApp:
         btn_cargar = Button(top, text='Cargar', command=cargar)
         btn_cargar.grid(row=5, column=1)
 
-            # Creamos el main loop para nuestra segunda ventana
+        # Creamos el main loop para nuestra segunda ventana
         top.mainloop()
-        
+
     def actualizar_total(self):
         total_guarani = sum(float(self.tree.item(item)['values'][3].replace(',', '.')) for item in self.tree.get_children())
         total_formatted = '{:,.3f}'.format(total_guarani).replace(',', '.')
@@ -257,64 +253,66 @@ class PresupuestoApp:
         cliente = self.combo.get()
         # Obtener la fecha actual
         fecha_actual = datetime.datetime.now().strftime("%Y-%m-%d")
-         # Sugerir el nombre de archivo con la fecha y el nombre del cliente
+        # Sugerir el nombre de archivo con la fecha y el nombre del cliente
         nombre_archivo = f"Presupuesto_{cliente}_{fecha_actual}.pdf"
         # Solicitar la ubicación y el nombre del archivo
         file_path = filedialog.asksaveasfilename(defaultextension=".pdf", filetypes=[("PDF Files", "*.pdf")],
-                                             initialfile=nombre_archivo)
+                                                initialfile=nombre_archivo)
         if not file_path:
             return  # El usuario canceló la selección o no ingresó un nombre de archivo
 
-    # Crear el lienzo del PDF
+        # Crear el lienzo del PDF
         pdf = canvas.Canvas(file_path, pagesize=letter)
 
-
-    # Configuración de fuentes
+        # Configuración de fuentes
         pdf.setFont("Times-Bold", 14)
         pdf.setFont("Times-Bold", 12)
 
-    # Título
+        # Título
         pdf.drawCentredString(300, 700, "Presupuesto Equipo de Computo")
 
-    # Cliente
+        # Cliente
         pdf.setFont("Times-Bold", 12)
         pdf.drawString(50, 650, f"Cliente: {cliente}")
 
-
-    # Subtítulo Equipo
+        # Subtítulo Equipo
         pdf.setFont("Times-Bold", 12)
         pdf.drawString(50, 620, "Equipo")
 
-    # Obtener los productos del Treeview
+        # Obtener los productos del Treeview
         productos = [self.tree.set(item, "Producto") for item in self.tree.get_children()]
 
-    # Imprimir los productos como párrafos
+        # Imprimir los productos como párrafos
         y = 600
         for producto in productos:
             pdf.setFont("Times-Bold", 12)
             pdf.drawString(70, y, producto)
             y -= 20
 
-    # Precio total
+        # Precio total
         pdf.drawString(50, y - 40, "Precio:")
         total = self.total_label.cget("text").split(": ")[1]
         pdf.drawString(100, y - 40, total + " contado con IVA incluido")
 
-    # Guardar el PDF y cerrar el lienzo
+        # Guardar el PDF y cerrar el lienzo
         pdf.save()
         # Mostrar mensaje de éxito
         messagebox.showinfo("PDF Generado", "El PDF se generó correctamente.")
 
-#funcion que se encarga de cargar la cotizacion en la etiqueta
     def guardar_cotizacion(self, cotizacion, top):
         self.lbl_cotizacion.config(text='Cotización: ' + cotizacion)
         top.destroy()
-        
-#Funcion que se encargar de cargar el porcentaje   
+
     def guardar_porcentaje(self, porcentaje, top):
         self.lbl_interes.config(text='Interés: ' + porcentaje + '%')
         top.destroy()
-        
+
+    def actualizar_nombres_clientes(self):
+        nombres_clientes = obtener_nombres_clientes()
+        self.combo['values'] = nombres_clientes
+        self.combo.current(0)  # Establecer la selección en el primer elemento de la lista
+
+
 root = Tk()
 app = PresupuestoApp(root)
 root.mainloop()
