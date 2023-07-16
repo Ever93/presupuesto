@@ -10,6 +10,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from tkinter import filedialog
 import datetime
+import re
 
 def conectar():
     conn = sqlite3.connect('crm.db')
@@ -35,7 +36,7 @@ class PresupuestoApp:
         self.create_menu()
         self.create_widgets()
         self.render_clientes()
-
+    
     def create_menu(self):
         menu_bar = tk.Menu(self.root)
 
@@ -66,7 +67,8 @@ class PresupuestoApp:
         combo_frame.grid(column=0, row=1)
         combo_label = ttk.Label(combo_frame, text='Cliente')
         combo_label.pack(side=tk.LEFT)
-        self.combo = ttk.Combobox(combo_frame, values=[])  # Utiliza self.combo directamente
+        self.combo = ttk.Combobox(combo_frame, values=[], postcommand=self.actualizar_coincidencias)  # Utiliza self.combo directamente
+        self.combo.set('')  # Establecer el valor seleccionado en blanco
         self.combo.pack(side=tk.LEFT)
         
         btn_dolar = tk.Button(frame1, text='Dolar', command=self.dolar_clicked)
@@ -120,7 +122,8 @@ class PresupuestoApp:
 
     def render_clientes(self):
         nombres_clientes = obtener_nombres_clientes()
-        self.combo['values'] = nombres_clientes
+        self.clientes = [nombre[0] for nombre in nombres_clientes]
+        self.combo['values'] = self.clientes
 
     def abrir_explorador_archivos(self):
         subprocess.run(["explorer.exe"])
@@ -309,9 +312,14 @@ class PresupuestoApp:
 
     def actualizar_nombres_clientes(self):
         nombres_clientes = obtener_nombres_clientes()
-        self.combo['values'] = nombres_clientes
+        self.clientes = [nombre[0] for nombre in nombres_clientes]
+        self.combo['values'] = self.clientes
         self.combo.current(0)  # Establecer la selección en el primer elemento de la lista
 
+    def actualizar_coincidencias(self):
+        texto_ingresado = self.combo.get()
+        coincidencias = [cliente for cliente in self.clientes if re.search(texto_ingresado, cliente, re.IGNORECASE)]
+        self.combo['values'] = coincidencias
 
 root = Tk()
 app = PresupuestoApp(root)
