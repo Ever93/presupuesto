@@ -71,6 +71,8 @@ class PresupuestoApp:
         self.combo.set('')  # Establecer el valor seleccionado en blanco
         self.combo.pack(side=tk.LEFT)
         
+        self.combo.bind('<Down>', self.desplegar_lista)  # Agregar el evento 'Down' para desplegar la lista
+        
         btn_dolar = tk.Button(frame1, text='Dolar', command=self.dolar_clicked)
         btn_dolar.grid(column=1, row=1)
         self.lbl_cotizacion = Label(frame1, text='Cotización: ')
@@ -319,7 +321,10 @@ class PresupuestoApp:
     def actualizar_coincidencias(self):
         texto_ingresado = self.combo.get()
         coincidencias = [cliente for cliente in self.clientes if re.search(texto_ingresado, cliente, re.IGNORECASE)]
-        self.combo['values'] = coincidencias
+        self.combo['values'] = coincidencias[:5]  # Mostrar solo las primeras 5 coincidencias
+        
+    def desplegar_lista(self, event):
+        self.combo.event_generate('<<ComboboxSelected>>')  # Generar el evento '<<ComboboxSelected>>' para desplegar la lista
 
 root = Tk()
 app = PresupuestoApp(root)
