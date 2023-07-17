@@ -106,7 +106,7 @@ class PresupuestoApp:
         tree_label = ttk.Label(tree_frame, text='Presupuesto')
         tree_label.pack()
 
-        self.tree = ttk.Treeview(tree_frame)
+        self.tree = ttk.Treeview(tree_frame, selectmode='browse')
         self.tree['columns'] = ('Codigo', 'Cantidad', 'Producto', 'Guarani', 'Dolar')
         self.tree.column('#0', width=0, stretch=tk.NO)
         self.tree.column('Codigo')
@@ -182,7 +182,14 @@ class PresupuestoApp:
         top.mainloop()
 
     def eliminar_producto_clicked(self):
-        pass
+        # Obtener el elemento seleccionado en el Treeview
+        selection = self.tree.selection()
+        if selection:
+        # Eliminar el elemento de la lista y del Treeview
+            self.tree.delete(selection)
+        # Actualizar el total
+            self.actualizar_total()
+
 
     def agregar_producto_clicked(self):
         top = Toplevel()
