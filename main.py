@@ -149,7 +149,12 @@ class PresupuestoApp:
 
         entry_cotizacion = tk.Entry(top)
         entry_cotizacion.pack()
+        entry_cotizacion.focus_set()  # Establecer el foco en el campo de entrada
 
+        def on_enter(event):
+            self.guardar_cotizacion(entry_cotizacion.get(), top)
+            
+        entry_cotizacion.bind('<Return>', on_enter)  # Ejecutar guardar_cotizacion al presionar Enter
         btn_guardar = tk.Button(top, text='Guardar', command=lambda: self.guardar_cotizacion(entry_cotizacion.get(), top))
         btn_guardar.pack()
         top.mainloop()
@@ -164,6 +169,12 @@ class PresupuestoApp:
 
         entry_porcentaje = tk.Entry(top)
         entry_porcentaje.pack()
+        entry_porcentaje.focus_set()  # Establecer el foco en el campo de entrada
+
+        def on_enter(event):
+            self.guardar_porcentaje(entry_porcentaje.get(), top)
+            
+        entry_porcentaje.bind('<Return>', on_enter)  # Ejecutar guardar_cotizacion al presionar Enter
 
         btn_guardar = tk.Button(top, text='Guardar', command=lambda: self.guardar_porcentaje(entry_porcentaje.get(), top))
         btn_guardar.pack()
