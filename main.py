@@ -10,6 +10,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from tkinter import filedialog
 import datetime
+import decimal
 import re
 
 def conectar():
@@ -296,7 +297,7 @@ class PresupuestoApp:
             # Formatear el valor de costo_total_guarani con separador de miles y sin decimales
             costo_total_guarani_str = locale.format_string("%.0f", costo_total_guarani, grouping=True)
             costo_total_guarani_str = costo_total_guarani_str.replace(',', '.')
-            costo_total_guarani_float = float(costo_total_guarani_str)
+    
             # Insertar los valores en el Treeview
             self.tree.insert('', END, values=(codigo_val, cantidad_val, producto_val, costo_total_guarani_str, f"{precio_dolar_val:.2f}"))
             # Actualizar el total
@@ -311,9 +312,10 @@ class PresupuestoApp:
         top.mainloop()
 
     def actualizar_total(self):
-        total_guarani = sum(float(self.tree.item(item)['values'][3].replace(',', '.')) for item in self.tree.get_children())
-        total_formatted = '{:,.3f}'.format(total_guarani).replace(',', '.')
+        total_guarani = sum(decimal.Decimal(str(self.tree.item(item)['values'][3].replace('.', ''))) for item in self.tree.get_children())
+        total_formatted = '{:,.0f}'.format(total_guarani).replace(',', '.')
         self.total_label.config(text=f'Total: {total_formatted}')
+
 
     def guardar_pedido_clicked(self):
         pass
