@@ -92,8 +92,17 @@ class PresupuestoApp:
         self.total_guarani = 0
         self.total_label = Label(frame1, text='Total:', font=('Arial', 12, 'bold'), anchor="w")
         self.total_label.grid(column=0, row=3)
+        
+        observacion_label = Label(self.root, font=('Arial', 12, 'bold'), text='Observación:')
+        observacion_label.pack(anchor='w')
+        
+        btn_observacion = tk.Button(frame1, text='Observacion', command=self.abrir_ventana_observacion)
+        btn_observacion.grid(column=2, row=3)
+        
         btn_guardar_pedido = tk.Button(frame1, text='Guardar', command=self.guardar_pedido_clicked)
-        btn_guardar_pedido.grid(column=2, row=3)
+        btn_guardar_pedido.grid(column=1, row=3)
+        
+        
 
         btn_generar_pedido = tk.Button(frame1, text='Pedio', command=self.generar_pedido_clicked)
         btn_generar_pedido.grid(column=3, row=3)
@@ -121,6 +130,47 @@ class PresupuestoApp:
         self.tree.heading('Guarani', text='Guarani')
         self.tree.heading('Dolar', text='Dolar')
         self.tree.pack()
+
+    def abrir_ventana_observacion(self):
+        top = tk.Toplevel()
+        top.title('Observación')
+        top.geometry('300x200')
+
+        observacion_text = tk.Text(top)
+        observacion_text.pack(fill=tk.BOTH, expand=True)
+
+        btn_cargar = tk.Button(top, text='Cargar', command=self.cargar_observacion)
+        btn_cargar.pack(side=tk.BOTTOM, pady=10)
+
+        top.transient(self.root)
+        top.grab_set()
+        self.root.wait_window(top)
+
+    def abrir_ventana_observacion(self):
+        top = tk.Toplevel()
+        top.title('Observación')
+        top.geometry('300x300')
+
+        frame = tk.Frame(top)
+        frame.pack(fill=tk.BOTH, expand=True)
+
+        observacion_text = tk.Text(frame, width=30, height=10)
+        observacion_text.pack(fill=tk.BOTH, expand=True)
+        observacion_text.focus_set()  # Mantener el enfoque en el cuadro de texto
+
+        btn_cargar = tk.Button(top, text='Cargar', command=lambda: self.cargar_observacion(observacion_text.get("1.0", tk.END).strip(), top))
+        btn_cargar.pack(side=tk.BOTTOM, pady=10)
+
+        top.transient(self.root)
+        top.grab_set()
+        self.root.wait_window(top)
+
+    def cargar_observacion(self, observacion, top):
+        print("Observación:", observacion)
+    # Haz algo con la observación (por ejemplo, cargarla en otro lugar)
+        top.destroy()
+
+
 
     def render_clientes(self):
         nombres_clientes = obtener_nombres_clientes()
