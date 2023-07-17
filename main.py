@@ -282,24 +282,30 @@ class PresupuestoApp:
             # Cálculos
             cotizacion = float(self.lbl_cotizacion.cget("text").split(': ')[1])  # Obtener el valor de la cotización
             porcentaje = float(self.lbl_interes.cget("text").split(': ')[1].strip('%'))  # Obtener el valor del porcentaje
-
             precio_dolar_val = float(precio_dolar_val) if precio_dolar_val else 0.0  # Convertir el precio en dólares a un número
             precio_guarani_val = float(precio_guarani_val) if precio_guarani_val else 0.0  # Convertir el precio en guaraníes a un número
             cantidad_val = int(cantidad_val)  # Convertir la cantidad a un número entero
-
-            costo_venta = (precio_dolar_val * cotizacion) * (1 + (porcentaje / 100))  # Calcular el costo de venta
-            costo_venta = round(costo_venta, 2)  # Redondear el costo de venta a 2 decimales
-
-            costo_total_guarani = costo_venta * cantidad_val  # Calcular el costo total en guaraníes
-
-            if precio_guarani_val:
-                self.total_guarani += costo_total_guarani
+            
+            if precio_dolar_val:
+                costo_venta = (precio_dolar_val * cotizacion) * (1 + (porcentaje / 100))
+                costo_venta = round(costo_venta, 2)  # Redondear el costo de venta a 2 decimales
+                costo_total_guarani = costo_venta * cantidad_val  # Calcular el costo total en guaraníes
+                if precio_guarani_val:
+                    self.total_guarani += costo_total_guarani
             # Formatear el valor de costo_total_guarani con separador de miles y sin decimales
-            costo_total_guarani_str = locale.format_string("%.0f", costo_total_guarani, grouping=True)
-            costo_total_guarani_str = costo_total_guarani_str.replace(',', '.')
-    
-            # Insertar los valores en el Treeview
-            self.tree.insert('', END, values=(codigo_val, cantidad_val, producto_val, costo_total_guarani_str, f"{precio_dolar_val:.2f}"))
+                costo_total_guarani_str = locale.format_string("%.0f", costo_total_guarani, grouping=True)
+                costo_total_guarani_str = costo_total_guarani_str.replace(',', '.')
+            # Formatear el valor de costo_total_guarani con separador de miles y sin decimale
+            else:
+                costo_venta = precio_guarani_val * cantidad_val
+                costo_total_guarani_str = locale.format_string("%.0f", costo_venta, grouping=True)
+                costo_total_guarani_str = costo_total_guarani_str.replace(',', '.')
+                #insertar valores en el treeview
+            if precio_dolar_val:
+                self.tree.insert('', END, values=(codigo_val, cantidad_val, producto_val, f'{costo_total_guarani_str}', f'{precio_dolar_val:.2f}'))
+            else:
+                self.tree.insert('', END, values=(codigo_val, cantidad_val, producto_val, costo_total_guarani_str, ''))
+
             # Actualizar el total
             self.actualizar_total()
             # Cerrar la ventana
