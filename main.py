@@ -32,7 +32,7 @@ class PresupuestoApp:
         self.root = root
         self.root.title('Presupuesto')
         self.root.geometry('1100x650')
-        
+        self.observacion_texto = ""  # Variable de instancia para almacenar el texto de la observación
         self.lbl_cotizacion_value = StringVar()
         self.lbl_interes_value = StringVar()
         self.create_menu()
@@ -92,9 +92,6 @@ class PresupuestoApp:
         self.total_label = Label(frame1, text='Total:', font=('Arial', 12, 'bold'), anchor="w")
         self.total_label.grid(column=0, row=3)
         
-        observacion_label = Label(self.root, font=('Arial', 12, 'bold'), text='Observación:')
-        observacion_label.pack(anchor='w')
-        
         btn_observacion = tk.Button(frame1, text='Observacion', command=self.abrir_ventana_observacion)
         btn_observacion.grid(column=2, row=3)
         
@@ -127,43 +124,43 @@ class PresupuestoApp:
         self.tree.heading('Guarani', text='Guarani')
         self.tree.heading('Dolar', text='Dolar')
         self.tree.pack()
+#Creamos label para cargar observacion
+        observacion_label = Label(self.root, font=('Arial', 12, 'bold'), text='Observación:')
+        observacion_label.pack(anchor='w')
 
+        self.observacion_frame = Frame(self.root, bd=1, relief='solid')
+        self.observacion_frame.pack(pady=5, padx=5, fill='both', expand=True)
+#se encarga de mostrar el texto
+        observacion_text_label = Label(self.observacion_frame, font=('Arial', 12), anchor='w')
+        observacion_text_label.pack(pady=5, padx=5, anchor='w')
+        
+
+        self.observacion_text_label = Label(self.observacion_frame, font=('Times New Roman', 12), text=self.observacion_texto, anchor='w', justify='left')
+        self.observacion_text_label.pack(pady=5, padx=5, anchor='w')
+  
+        
     def abrir_ventana_observacion(self):
-        top = tk.Toplevel()
-        top.title('Observación')
-        top.geometry('300x200')
-
-        observacion_text = tk.Text(top)
-        observacion_text.pack(fill=tk.BOTH, expand=True)
-
-        btn_cargar = tk.Button(top, text='Cargar', command=self.cargar_observacion)
-        btn_cargar.pack(side=tk.BOTTOM, pady=10)
-
-        top.transient(self.root)
-        top.grab_set()
-        self.root.wait_window(top)
-
-    def abrir_ventana_observacion(self):
-        top = tk.Toplevel()
+        top = Toplevel()
         top.title('Observación')
         top.geometry('300x300')
 
-        frame = tk.Frame(top)
-        frame.pack(fill=tk.BOTH, expand=True)
+        frame = Frame(top)
+        frame.pack(fill=BOTH, expand=True)
 
-        observacion_text = tk.Text(frame, width=30, height=10)
-        observacion_text.pack(fill=tk.BOTH, expand=True)
+        observacion_text = Entry(frame, width=30, font=('Arial', 12))
+        observacion_text.pack(pady=10, padx=10)
         observacion_text.focus_set()  # Mantener el enfoque en el cuadro de texto
 
-        btn_cargar = tk.Button(top, text='Cargar', command=lambda: self.cargar_observacion(observacion_text.get("1.0", tk.END).strip(), top))
-        btn_cargar.pack(side=tk.BOTTOM, pady=10)
+        btn_cargar = Button(frame, text='Cargar', command=lambda: self.cargar_observacion(observacion_text.get(), top))
+        btn_cargar.pack(pady=10)
 
         top.transient(self.root)
         top.grab_set()
         self.root.wait_window(top)
 
     def cargar_observacion(self, observacion, top):
-        print("Observación:", observacion)
+        self.observacion_texto = observacion
+        self.observacion_text_label.config(text=self.observacion_texto)
         top.destroy()
 
     def render_clientes(self):
