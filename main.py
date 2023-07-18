@@ -1,17 +1,16 @@
 import sqlite3
 from tkinter import *
-from tkinter import messagebox
+from tkinter import messagebox, ttk, filedialog
 import tkinter as tk
 import subprocess
-from tkinter import ttk
 from ventana2 import CRMApp
 import locale
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
-from tkinter import filedialog
 import datetime
 import decimal
 import re
+
 
 def conectar():
     conn = sqlite3.connect('crm.db')
@@ -33,14 +32,15 @@ class PresupuestoApp:
         self.root = root
         self.root.title('Presupuesto')
         self.root.geometry('1100x650')
-
+        
+        self.lbl_cotizacion_value = StringVar()
+        self.lbl_interes_value = StringVar()
         self.create_menu()
         self.create_widgets()
         self.render_clientes()
     
     def create_menu(self):
         menu_bar = tk.Menu(self.root)
-
         file_menu = tk.Menu(menu_bar, tearoff=0)
         file_menu.add_command(label="Abrir", command=self.abrir_explorador_archivos)
         file_menu.add_separator()
@@ -52,11 +52,9 @@ class PresupuestoApp:
 
         menu_bar.add_cascade(label="Archivo", menu=file_menu)
         menu_bar.add_cascade(label="Opciones", menu=options_menu)
-
         self.root.config(menu=menu_bar)
 
     def create_widgets(self):
-        
         frame = tk.Frame(self.root)
         frame.pack()
         Label(frame, text='Sistema', font=('Arial', 14, 'bold'), anchor="w").grid(column=0, row=0)
@@ -68,10 +66,10 @@ class PresupuestoApp:
         combo_frame.grid(column=0, row=1)
         combo_label = ttk.Label(combo_frame, text='Cliente')
         combo_label.pack(side=tk.LEFT)
+        
         self.combo = ttk.Combobox(combo_frame, values=[], postcommand=self.actualizar_coincidencias)  # Utiliza self.combo directamente
         self.combo.set('')  # Establecer el valor seleccionado en blanco
         self.combo.pack(side=tk.LEFT)
-        
         self.combo.bind('<Down>', self.desplegar_lista)  # Agregar el evento 'Down' para desplegar la lista
         
         btn_dolar = tk.Button(frame1, text='Dolar', command=self.dolar_clicked)
@@ -103,8 +101,6 @@ class PresupuestoApp:
         btn_guardar_pedido = tk.Button(frame1, text='Guardar', command=self.guardar_pedido_clicked)
         btn_guardar_pedido.grid(column=1, row=3)
         
-        
-
         btn_generar_pedido = tk.Button(frame1, text='Pedio', command=self.generar_pedido_clicked)
         btn_generar_pedido.grid(column=3, row=3)
 
@@ -168,10 +164,7 @@ class PresupuestoApp:
 
     def cargar_observacion(self, observacion, top):
         print("Observación:", observacion)
-    # Haz algo con la observación (por ejemplo, cargarla en otro lugar)
         top.destroy()
-
-
 
     def render_clientes(self):
         nombres_clientes = obtener_nombres_clientes()
@@ -185,7 +178,6 @@ class PresupuestoApp:
         self.crm_app = CRMApp(self)  # Pasar self como argumento
         self.actualizar_nombres_clientes()  # Actualizar los nombres de clientes en el Combobox
         self.crm_app.mainloop()  # Mostrar la ventana CRMApp
-
 
     def opcion_empresa(self):
         pass
@@ -209,7 +201,7 @@ class PresupuestoApp:
         btn_guardar = tk.Button(top, text='Guardar', command=lambda: self.guardar_cotizacion(entry_cotizacion.get(), top))
         btn_guardar.pack()
         top.mainloop()
-
+ 
     def porcentaje_clicked(self):
         top = tk.Toplevel()
         top.title('Cargar Porcentaje')
@@ -229,9 +221,18 @@ class PresupuestoApp:
 
         btn_guardar = tk.Button(top, text='Guardar', command=lambda: self.guardar_porcentaje(entry_porcentaje.get(), top))
         btn_guardar.pack()
-
         top.mainloop()
+    
+    def guardar_cotizacion(self, cotizacion, top):
+        self.lbl_cotizacion.config(text='Cotización: ' + cotizacion)
+        self.lbl_cotizacion_value.set(cotizacion)  # Actualizar el valor de lbl_cotizacion_value después de guardar la cotización
+        top.destroy()
 
+    def guardar_porcentaje(self, porcentaje, top):
+        self.lbl_interes.config(text='Interés: ' + porcentaje + '%')
+        self.lbl_interes_value.set(porcentaje)  # Actualizar el valor de lbl_interes_value después de guardar el porcentaje
+        top.destroy()
+  
     def eliminar_producto_clicked(self):
         # Obtener el elemento seleccionado en el Treeview
         selection = self.tree.selection()
@@ -241,87 +242,92 @@ class PresupuestoApp:
         # Actualizar el total
             self.actualizar_total()
 
-
     def agregar_producto_clicked(self):
-        top = Toplevel()
-        top.title('Cargar producto')
-        top.geometry('350x140')
+        
+        cotizacion_vacia = self.lbl_cotizacion.cget("text") == "Cotización: "
+        interes_vacio = self.lbl_interes.cget("text") == "Interés:"
 
-        lcodigo = Label(top, text='Codigo')
-        codigo = Entry(top, width=40)
-        lcodigo.grid(row=0, column=0)
-        codigo.grid(row=0, column=1)
+        if cotizacion_vacia:
+            messagebox.showwarning("Cotización requerida", "La cotización es requerida.")
+        elif interes_vacio:
+            messagebox.showwarning("Interés requerido", "El interés es requerido.")
+        else:
+            top = Toplevel()
+            top.title('Cargar producto')
+            top.geometry('350x140')
 
-        lcantidad = Label(top, text='Cantidad')
-        cantidad = Entry(top, width=40)
-        lcantidad.grid(row=1, column=0)
-        cantidad.grid(row=1, column=1)
+            lcodigo = Label(top, text='Codigo')
+            codigo = Entry(top, width=40)
+            lcodigo.grid(row=0, column=0)
+            codigo.grid(row=0, column=1)
+
+            lcantidad = Label(top, text='Cantidad')
+            cantidad = Entry(top, width=40)
+            lcantidad.grid(row=1, column=0)
+            cantidad.grid(row=1, column=1)
         
-        lproducto = Label(top, text='Producto')
-        producto = Entry(top, width=40)
-        lproducto.grid(row=2, column=0)
-        producto.grid(row=2, column=1)
+            lproducto = Label(top, text='Producto')
+            producto = Entry(top, width=40)
+            lproducto.grid(row=2, column=0)
+            producto.grid(row=2, column=1)
         
-        lprecio_dolar = Label(top, text='Precio Dolar')
-        precio_dolar = Entry(top, width=40)
-        lprecio_dolar.grid(row=3, column=0)
-        precio_dolar.grid(row=3, column=1)
+            lprecio_dolar = Label(top, text='Precio Dolar')
+            precio_dolar = Entry(top, width=40)
+            lprecio_dolar.grid(row=3, column=0)
+            precio_dolar.grid(row=3, column=1)
         
-        lprecio_guarani = Label(top, text='Precio Guarani')
-        precio_guarani = Entry(top, width=40)
-        lprecio_guarani.grid(row=4, column=0)
-        precio_guarani.grid(row=4, column=1)
+            lprecio_guarani = Label(top, text='Precio Guarani')
+            precio_guarani = Entry(top, width=40)
+            lprecio_guarani.grid(row=4, column=0)
+            precio_guarani.grid(row=4, column=1)
         
-        def cargar():
+            def cargar():
             # Obtener los valores de los campos
-            codigo_val = codigo.get()
-            cantidad_val = cantidad.get()
-            producto_val = producto.get()
-            precio_dolar_val = precio_dolar.get()
-            precio_guarani_val = precio_guarani.get()
+                codigo_val = codigo.get()
+                cantidad_val = cantidad.get()
+                producto_val = producto.get()
+                precio_dolar_val = precio_dolar.get()
+                precio_guarani_val = precio_guarani.get()
             # Cálculos
-            cotizacion = float(self.lbl_cotizacion.cget("text").split(': ')[1])  # Obtener el valor de la cotización
-            porcentaje = float(self.lbl_interes.cget("text").split(': ')[1].strip('%'))  # Obtener el valor del porcentaje
-            precio_dolar_val = float(precio_dolar_val) if precio_dolar_val else 0.0  # Convertir el precio en dólares a un número
-            precio_guarani_val = float(precio_guarani_val) if precio_guarani_val else 0.0  # Convertir el precio en guaraníes a un número
-            cantidad_val = int(cantidad_val)  # Convertir la cantidad a un número entero
+                cotizacion = float(self.lbl_cotizacion.cget("text").split(': ')[1])  # Obtener el valor de la cotización
+                porcentaje = float(self.lbl_interes.cget("text").split(': ')[1].strip('%'))  # Obtener el valor del porcentaje
+                precio_dolar_val = float(precio_dolar_val) if precio_dolar_val else 0.0  # Convertir el precio en dólares a un número
+                precio_guarani_val = float(precio_guarani_val) if precio_guarani_val else 0.0  # Convertir el precio en guaraníes a un número
+                cantidad_val = int(cantidad_val)  # Convertir la cantidad a un número entero
             
-            if precio_dolar_val:
-                costo_venta = (precio_dolar_val * cotizacion) * (1 + (porcentaje / 100))
-                costo_venta = round(costo_venta, 2)  # Redondear el costo de venta a 2 decimales
-                costo_total_guarani = costo_venta * cantidad_val  # Calcular el costo total en guaraníes
-                if precio_guarani_val:
-                    self.total_guarani += costo_total_guarani
+                if precio_dolar_val:
+                    costo_venta = (precio_dolar_val * cotizacion) * (1 + (porcentaje / 100))
+                    costo_venta = round(costo_venta, 2)  # Redondear el costo de venta a 2 decimales
+                    costo_total_guarani = costo_venta * cantidad_val  # Calcular el costo total en guaraníes
+                    if precio_guarani_val:
+                        self.total_guarani += costo_total_guarani
             # Formatear el valor de costo_total_guarani con separador de miles y sin decimales
-                costo_total_guarani_str = locale.format_string("%.0f", costo_total_guarani, grouping=True)
-                costo_total_guarani_str = costo_total_guarani_str.replace(',', '.')
+                    costo_total_guarani_str = locale.format_string("%.0f", costo_total_guarani, grouping=True)
+                    costo_total_guarani_str = costo_total_guarani_str.replace(',', '.')
             # Formatear el valor de costo_total_guarani con separador de miles y sin decimale
-            else:
-                costo_venta = precio_guarani_val * cantidad_val
-                costo_total_guarani_str = locale.format_string("%.0f", costo_venta, grouping=True)
-                costo_total_guarani_str = costo_total_guarani_str.replace(',', '.')
+                else:
+                    costo_venta = precio_guarani_val * cantidad_val
+                    costo_total_guarani_str = locale.format_string("%.0f", costo_venta, grouping=True)
+                    costo_total_guarani_str = costo_total_guarani_str.replace(',', '.')
                 #insertar valores en el treeview
-            if precio_dolar_val:
-                self.tree.insert('', END, values=(codigo_val, cantidad_val, producto_val, f'{costo_total_guarani_str}', f'{precio_dolar_val:.2f}'))
-            else:
-                self.tree.insert('', END, values=(codigo_val, cantidad_val, producto_val, costo_total_guarani_str, ''))
+                if precio_dolar_val:
+                    self.tree.insert('', END, values=(codigo_val, cantidad_val, producto_val, f'{costo_total_guarani_str}', f'{precio_dolar_val:.2f}'))
+                else:
+                    self.tree.insert('', END, values=(codigo_val, cantidad_val, producto_val, costo_total_guarani_str, ''))
 
             # Actualizar el total
-            self.actualizar_total()
+                self.actualizar_total()
             # Cerrar la ventana
-            top.destroy()
+                top.destroy()
 
-        btn_cargar = Button(top, text='Cargar', command=cargar)
-        btn_cargar.grid(row=5, column=1)
-
-        # Creamos el main loop para nuestra segunda ventana
-        top.mainloop()
+            btn_cargar = Button(top, text='Cargar', command=cargar)
+            btn_cargar.grid(row=5, column=1)
+            top.mainloop()
 
     def actualizar_total(self):
         total_guarani = sum(decimal.Decimal(str(self.tree.item(item)['values'][3].replace('.', ''))) for item in self.tree.get_children())
         total_formatted = '{:,.0f}'.format(total_guarani).replace(',', '.')
         self.total_label.config(text=f'Total: {total_formatted}')
-
 
     def guardar_pedido_clicked(self):
         pass
