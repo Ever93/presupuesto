@@ -38,6 +38,7 @@ class PresupuestoApp:
         self.create_menu()
         self.create_widgets()
         self.render_clientes()
+        self.elementos_eliminados = {}
     
     def create_menu(self):
         menu_bar = tk.Menu(self.root)
@@ -330,7 +331,133 @@ class PresupuestoApp:
         pass
 
     def generar_pedido_clicked(self):
-        pass
+        top = Toplevel()
+        top.title('Pedido')
+        top.geometry('800x400')
+
+        tree_frame = tk.Frame(top)
+        tree_frame.pack(fill=BOTH, expand=True)
+
+        tree_label = ttk.Label(tree_frame, text='Pedido')
+        tree_label.pack()
+
+        tree = ttk.Treeview(tree_frame, selectmode='browse')
+        tree['columns'] = ('Codigo', 'Cantidad', 'Producto', 'Guarani', 'Dolar')
+        tree.column('#0', width=0, stretch=tk.NO)
+        tree.column('Codigo')
+        tree.column('Cantidad')
+        tree.column('Producto')
+        tree.column('Guarani')
+        tree.column('Dolar')
+
+        tree.heading('Codigo', text='Codigo')
+        tree.heading('Cantidad', text='Cantidad')
+        tree.heading('Producto', text='Producto')
+        tree.heading('Guarani', text='Guarani')
+        tree.heading('Dolar', text='Dolar')
+        tree.pack()
+
+    # Agregar los mismos datos del Treeview original al nuevo Treeview en la ventana modal
+        for item in self.tree.get_children():
+            values = self.tree.item(item, "values")
+            tree.insert('', END, values=values)
+
+        # Lista que almacenará los elementos eliminados y si deben ser restaurados
+        self.elementos_eliminados[top] = []
+
+         # Frame para contener los botones en una fila
+        btn_frame = tk.Frame(top)
+        btn_frame.pack()
+
+    # Botón Eliminar
+        btn_eliminar = Button(btn_frame, text='Eliminar', command=lambda: self.eliminar_pedido(tree))
+        btn_eliminar.pack(side=LEFT, padx=5)
+
+    # Botón Restaurar
+        btn_restaurar = Button(btn_frame, text='Restaurar', command=lambda: self.restaurar_pedido(tree))
+        btn_restaurar.pack(side=LEFT, padx=5)
+
+    # Botón Imagen
+        btn_imagen = Button(btn_frame, text='Imagen', command=lambda: self.guardar_imagen(tree))
+        btn_imagen.pack(side=LEFT, padx=5)
+
+    # Botón PDF
+        btn_pdf = Button(btn_frame, text='PDF', command=lambda: self.guardar_pdf(tree))
+        btn_pdf.pack(side=LEFT, padx=5)
+
+    def eliminar_pedido(self, tree, top):
+    # Obtener el elemento seleccionado en el Treeview de la ventana modal
+        selection = tree.selection()
+        if selection:
+        # Obtener los valores del elemento seleccionado en el Treeview
+            values = tree.item(selection, "values")
+        # Eliminar el elemento de la lista y del Treeview
+            tree.delete(selection)
+        # Actualizar el total en la ventana principal
+            self.actualizar_total()
+        # Guardar el elemento eliminado en la lista temporal específica para la ventana modal
+            self.elementos_eliminados[top].append(values)
+
+    def restaurar_pedido(self, tree, top):
+    # Obtener los elementos eliminados específicos de la ventana modal
+        elementos_eliminados = self.elementos_eliminados.get(top, [])
+        seleccionados = []
+        for index, values in enumerate(elementos_eliminados):
+            seleccionados.append((index, values))
+        if seleccionados:
+            top_restaurar = Toplevel()
+            top_restaurar.title('Restaurar Pedido')
+            top_restaurar.geometry('600x400')
+
+            tree_frame = tk.Frame(top_restaurar)
+            tree_frame.pack(fill=BOTH, expand=True)
+
+            tree_label = ttk.Label(tree_frame, text='Productos Eliminados')
+            tree_label.pack()
+
+            tree_restaurar = ttk.Treeview(tree_frame, selectmode='browse')
+            tree_restaurar['columns'] = ('Codigo', 'Cantidad', 'Producto', 'Guarani', 'Dolar')
+            tree_restaurar.column('#0', width=0, stretch=tk.NO)
+            tree_restaurar.column('Codigo')
+            tree_restaurar.column('Cantidad')
+            tree_restaurar.column('Producto')
+            tree_restaurar.column('Guarani')
+            tree_restaurar.column('Dolar')
+
+            tree_restaurar.heading('Codigo', text='Codigo')
+            tree_restaurar.heading('Cantidad', text='Cantidad')
+            tree_restaurar.heading('Producto', text='Producto')
+            tree_restaurar.heading('Guarani', text='Guarani')
+            tree_restaurar.heading('Dolar', text='Dolar')
+            tree_restaurar.pack()
+
+            for index, values in seleccionados:
+                tree_restaurar.insert('', END, values=values)
+
+            btn_restaurar_seleccionados = Button(top_restaurar, text='Restaurar Seleccionados',
+                                                command=lambda: self.restaurar_seleccionados(tree, top, tree_restaurar))
+            btn_restaurar_seleccionados.pack()
+
+    def restaurar_seleccionados(self, tree, top, top_restaurar):
+    # Obtener los elementos seleccionados en el Treeview de la ventana modal de restaurar
+        selection = top_restaurar.selection()
+        seleccionados = []
+        if selection:
+            for item in selection:
+                seleccionados.append(top_restaurar.item(item, "values"))
+
+    # Restaurar los elementos seleccionados en el Treeview principal
+        for item in seleccionados:
+            tree.insert('', END, values=item)
+
+    # Eliminar los elementos seleccionados del Treeview de la ventana modal de restaurar
+        for item in selection:
+            top_restaurar.delete(item)
+
+    # Cerrar la ventana modal de restaurar
+        #top_restaurar.destroy()
+
+
 
     def generar_presupuesto_clicked(self):
         # Obtener el nombre del cliente seleccionado del Combobox
