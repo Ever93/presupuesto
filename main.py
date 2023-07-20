@@ -61,6 +61,7 @@ class PresupuestoApp:
 
         frame1 = tk.LabelFrame(self.root, text='Presupuesto', padx=10, pady=10, borderwidth=5)
         frame1.pack(padx=10, pady=10)
+        
 
         combo_frame = tk.Frame(frame1)
         combo_frame.grid(column=0, row=1)
@@ -126,15 +127,12 @@ class PresupuestoApp:
         self.tree.pack()
 #Creamos label para cargar observacion
         observacion_label = Label(self.root, font=('Arial', 12, 'bold'), text='Observación:')
-        observacion_label.pack(anchor='w')
+        observacion_label.pack(anchor='w', padx='20')
 
-        self.observacion_frame = Frame(self.root, bd=1, relief='solid')
-        self.observacion_frame.pack(pady=5, padx=5, fill='both', expand=True)
-#se encarga de mostrar el texto
-        observacion_text_label = Label(self.observacion_frame, font=('Arial', 12), anchor='w')
-        observacion_text_label.pack(pady=5, padx=5, anchor='w')
+        self.observacion_frame = Frame(self.root, bd=1, relief='solid',  width=200, height=200)  # Ajusta los valores de width y height según tu preferencia
+        self.observacion_frame.pack(pady=1, padx=35, anchor='w', fill='both')
         
-
+#Aqui se muestra el texto cargado en observacion
         self.observacion_text_label = Label(self.observacion_frame, font=('Times New Roman', 12), text=self.observacion_texto, anchor='w', justify='left')
         self.observacion_text_label.pack(pady=5, padx=5, anchor='w')
   
@@ -147,11 +145,13 @@ class PresupuestoApp:
         frame = Frame(top)
         frame.pack(fill=BOTH, expand=True)
 
-        observacion_text = Entry(frame, width=30, font=('Arial', 12))
+        observacion_text = Text(frame, width=30, height=3, font=('Arial', 12))
         observacion_text.pack(pady=10, padx=10)
-        observacion_text.focus_set()  # Mantener el enfoque en el cuadro de texto
+        observacion_text.focus_set() 
 
-        btn_cargar = Button(frame, text='Cargar', command=lambda: self.cargar_observacion(observacion_text.get(), top))
+        observacion_text.bind("<Return>", lambda event: self.cargar_observacion(observacion_text.get("1.0", "end-1c"), top))
+
+        btn_cargar = Button(frame, text='Cargar', command=lambda: self.cargar_observacion(observacion_text.get("1.0", "end-1c"), top))
         btn_cargar.pack(pady=10)
 
         top.transient(self.root)
