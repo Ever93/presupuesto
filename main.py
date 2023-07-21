@@ -3,7 +3,7 @@ from tkinter import *
 from tkinter import messagebox, ttk, filedialog
 import tkinter as tk
 import subprocess
-from ventana2 import CRMApp
+from cliente import CRMApp
 import locale
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
