@@ -10,6 +10,7 @@ from reportlab.pdfgen import canvas
 import datetime
 import decimal
 import re
+from tkinter import simpledialog
 
 
 def conectar():
@@ -136,7 +137,7 @@ class PresupuestoApp:
 #Aqui se muestra el texto cargado en observacion
         self.observacion_text_label = Label(self.observacion_frame, font=('Times New Roman', 12), text=self.observacion_texto, anchor='w', justify='left')
         self.observacion_text_label.pack(pady=5, padx=5, anchor='w')
-  
+
         
     def abrir_ventana_observacion(self):
         top = Toplevel()
@@ -454,61 +455,103 @@ class PresupuestoApp:
         for item in selection:
             top_restaurar.delete(item)
 
-    # Cerrar la ventana modal de restaurar
-        #top_restaurar.destroy()
-
-
 
     def generar_presupuesto_clicked(self):
         # Obtener el nombre del cliente seleccionado del Combobox
         cliente = self.combo.get()
-        # Obtener la fecha actual
-        fecha_actual = datetime.datetime.now().strftime("%Y-%m-%d")
-        # Sugerir el nombre de archivo con la fecha y el nombre del cliente
-        nombre_archivo = f"Presupuesto_{cliente}_{fecha_actual}.pdf"
-        # Solicitar la ubicación y el nombre del archivo
-        file_path = filedialog.asksaveasfilename(defaultextension=".pdf", filetypes=[("PDF Files", "*.pdf")],
-                                                initialfile=nombre_archivo)
-        if not file_path:
-            return  # El usuario canceló la selección o no ingresó un nombre de archivo
+        # Mostrar el cuadro de diálogo para seleccionar los elementos a incluir en el PDF
+        items_a_imprimir = self.mostrar_cuadro_dialogo_items()
 
-        # Crear el lienzo del PDF
+        if items_a_imprimir is None:
+        # Si el usuario cancela el cuadro de diálogo, no se genera el PDF
+            return
+        
+    def mostrar_cuadro_dialogo_items(self):
+    # Obtener los productos del Treeview
+        productos = [self.tree.set(item, "Producto") for item in self.tree.get_children()]
+
+    # Mostrar el cuadro de diálogo
+        dialog = tk.Toplevel()
+        dialog.title("Seleccionar elementos")
+        dialog.geometry("400x400")
+
+        label = tk.Label(dialog, text="Seleccione los elementos que desea incluir en el presupuesto:")
+        label.pack()
+
+        items_var = []
+        for producto in productos:
+            var = tk.IntVar(value=1)  # Inicialmente, todos los elementos están marcados
+            items_var.append(var)
+            check_btn = tk.Checkbutton(dialog, text=producto, variable=var, onvalue=1, offvalue=0)
+            check_btn.pack(anchor=tk.W)
+
+        def generar_presupuesto():
+            selected_items = [
+                producto for producto, var in zip(productos, items_var) if var.get() == 1
+            ]
+            dialog.destroy()
+            self.generar_presupuesto_clicked_with_items(selected_items)
+
+        btn_generar = tk.Button(dialog, text="Generar", command=generar_presupuesto)
+        btn_generar.pack()
+
+        dialog.mainloop()
+        
+    def generar_presupuesto_clicked_with_items(self, items_a_imprimir):
+    # Obtener el nombre del cliente seleccionado del Combobox
+        cliente = self.combo.get()
+
+    # Obtener la fecha actual
+        fecha_actual = datetime.datetime.now().strftime("%Y-%m-%d")
+
+    # Sugerir el nombre de archivo con la fecha y el nombre del cliente
+        nombre_archivo = f"Presupuesto_{cliente}_{fecha_actual}.pdf"
+
+    # Solicitar la ubicación y el nombre del archivo
+        file_path = filedialog.asksaveasfilename(
+            defaultextension=".pdf", filetypes=[("PDF Files", "*.pdf")], initialfile=nombre_archivo
+        )
+
+        if not file_path:
+        # El usuario canceló la selección o no ingresó un nombre de archivo
+            return
+
+    # Crear el lienzo del PDF
         pdf = canvas.Canvas(file_path, pagesize=letter)
 
-        # Configuración de fuentes
+    # Configuración de fuentes
         pdf.setFont("Times-Bold", 14)
         pdf.setFont("Times-Bold", 12)
 
-        # Título
+    # Título
         pdf.drawCentredString(300, 700, "Presupuesto Equipo de Computo")
 
-        # Cliente
+    # Cliente
         pdf.setFont("Times-Bold", 12)
         pdf.drawString(50, 650, f"Cliente: {cliente}")
 
-        # Subtítulo Equipo
+    # Subtítulo Equipo
         pdf.setFont("Times-Bold", 12)
         pdf.drawString(50, 620, "Equipo")
 
-        # Obtener los productos del Treeview
-        productos = [self.tree.set(item, "Producto") for item in self.tree.get_children()]
-
-        # Imprimir los productos como párrafos
+    # Imprimir los productos seleccionados como párrafos
         y = 600
-        for producto in productos:
+        for producto in items_a_imprimir:
             pdf.setFont("Times-Bold", 12)
             pdf.drawString(70, y, producto)
             y -= 20
 
-        # Precio total
+    # Precio total
         pdf.drawString(50, y - 40, "Precio:")
         total = self.total_label.cget("text").split(": ")[1]
         pdf.drawString(100, y - 40, total + " contado con IVA incluido")
 
-        # Guardar el PDF y cerrar el lienzo
+    # Guardar el PDF y cerrar el lienzo
         pdf.save()
-        # Mostrar mensaje de éxito
+
+    # Mostrar mensaje de éxito
         messagebox.showinfo("PDF Generado", "El PDF se generó correctamente.")
+
 
     def guardar_cotizacion(self, cotizacion, top):
         self.lbl_cotizacion.config(text='Cotización: ' + cotizacion)
