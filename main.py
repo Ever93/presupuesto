@@ -473,7 +473,7 @@ class PresupuestoApp:
     # Mostrar el cuadro de diálogo
         dialog = tk.Toplevel()
         dialog.title("Seleccionar elementos")
-        dialog.geometry("400x400")
+        #dialog.geometry("400x400")
 
         label = tk.Label(dialog, text="Seleccione los elementos que desea incluir en el presupuesto:")
         label.pack()
@@ -495,6 +495,10 @@ class PresupuestoApp:
         btn_generar = tk.Button(dialog, text="Generar", command=generar_presupuesto)
         btn_generar.pack()
 
+        # Hacer que el cuadro de diálogo se adapte a su contenido
+        dialog.update_idletasks()
+        dialog.geometry(f"{dialog.winfo_reqwidth()}x{dialog.winfo_reqheight()}")
+        
         dialog.mainloop()
         
     def generar_presupuesto_clicked_with_items(self, items_a_imprimir):
