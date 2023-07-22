@@ -101,7 +101,7 @@ class PresupuestoApp:
         btn_guardar_pedido = tk.Button(frame1, text='Guardar', command=self.guardar_pedido_clicked)
         btn_guardar_pedido.grid(column=1, row=3)
         
-        btn_generar_pedido = tk.Button(frame1, text='Pedio', command=self.generar_pedido_clicked)
+        btn_generar_pedido = tk.Button(frame1, text='Pedido', command=self.mostrar_cuadro_dialogo_pedido)
         btn_generar_pedido.grid(column=3, row=3)
 
         btn_generar_presupuesto = tk.Button(frame1, text='Presupuesto', command=self.generar_presupuesto_clicked)
@@ -455,6 +455,61 @@ class PresupuestoApp:
         for item in selection:
             top_restaurar.delete(item)
 
+    def mostrar_cuadro_dialogo_pedido(self):
+        # Obtener los productos del Treeview
+            productos = [self.tree.set(item, "Producto") for item in self.tree.get_children()]
+
+        # Mostrar el cuadro de diálogo
+            dialog = tk.Toplevel()
+            dialog.title("Seleccionar elementos para el Pedido")
+
+            label = tk.Label(dialog, text="Seleccione los elementos que desea incluir en el pedido:")
+            label.pack()
+
+            items_var = []
+            for producto in productos:
+                var = tk.IntVar(value=1)  # Inicialmente, todos los elementos están marcados
+                items_var.append(var)
+                radio_btn = tk.Radiobutton(dialog, text=producto, variable=var, value=1)
+                radio_btn.pack(anchor=tk.W)
+
+            def generar_pdf_pedido():
+                selected_items = [
+                    producto for producto, var in zip(productos, items_var) if var.get() == 1
+                ]
+                dialog.destroy()
+                self.generar_pedido_pdf(selected_items)
+
+            def generar_img_pedido():
+                selected_items = [
+                    producto for producto, var in zip(productos, items_var) if var.get() == 1
+                ]
+                dialog.destroy()
+                self.generar_pedido_img(selected_items)
+
+            
+            button_frame = tk.Frame(dialog)
+            button_frame.pack(pady=10)
+
+            btn_generar_pdf = tk.Button(button_frame, text="Generar PDF", command=generar_pdf_pedido)
+            btn_generar_pdf.pack(side=tk.LEFT, padx=10, pady=5)  # Ubicar a la izquierda con un espaciado
+
+            btn_generar_img = tk.Button(button_frame, text="Generar Imagen", command=generar_img_pedido)
+            btn_generar_img.pack(side=tk.LEFT, padx=10, pady=5)  # Ubicar a la izquierda con un espaciado
+
+        # Hacer que el cuadro de diálogo se adapte a su contenido
+            dialog.update_idletasks()
+            dialog.geometry(f"{dialog.winfo_reqwidth()}x{dialog.winfo_reqheight()}")
+
+            dialog.mainloop()
+
+    def generar_pedido_pdf(self, items_a_imprimir):
+        # Tu código para generar el PDF del pedido aquí...
+        pass
+
+    def generar_pedido_img(self, items_a_imprimir):
+        # Tu código para generar la imagen del pedido aquí...
+        pass
 
     def generar_presupuesto_clicked(self):
         # Obtener el nombre del cliente seleccionado del Combobox
