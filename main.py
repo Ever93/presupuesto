@@ -547,8 +547,16 @@ class PresupuestoApp:
             dialog.destroy()
             self.generar_presupuesto_clicked_with_items(selected_items)
 
-        btn_generar = tk.Button(dialog, text="Generar", command=generar_presupuesto)
-        btn_generar.pack()
+        button_frame = tk.Frame(dialog)
+        button_frame.pack(pady=10)
+
+        btn_generar_pdf = tk.Button(button_frame, text="Generar", command=generar_presupuesto)
+        btn_generar_pdf.pack(side=tk.LEFT, padx=10, pady=5)  # Ubicar a la izquierda con un espaciado
+
+        btn_generar_img = tk.Button(button_frame, text="Detallar", command='')
+        btn_generar_img.pack(side=tk.LEFT, padx=10, pady=5)  # Ubicar a la izquierda con un espaciado
+        #btn_generar = tk.Button(dialog, text="Generar", command=generar_presupuesto)
+        #btn_generar.pack()
 
         # Hacer que el cuadro de diálogo se adapte a su contenido
         dialog.update_idletasks()
