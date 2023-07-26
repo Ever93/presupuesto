@@ -137,8 +137,7 @@ class PresupuestoApp:
 #Aqui se muestra el texto cargado en observacion
         self.observacion_text_label = Label(self.observacion_frame, font=('Times New Roman', 12), text=self.observacion_texto, anchor='w', justify='left')
         self.observacion_text_label.pack(pady=5, padx=5, anchor='w')
-
-        
+  
     def abrir_ventana_observacion(self):
         top = Toplevel()
         top.title('Observación')
@@ -331,181 +330,99 @@ class PresupuestoApp:
     def guardar_pedido_clicked(self):
         pass
 
-    def generar_pedido_clicked(self):
-        top = Toplevel()
-        top.title('Pedido')
-        top.geometry('800x400')
-
-        tree_frame = tk.Frame(top)
-        tree_frame.pack(fill=BOTH, expand=True)
-
-        tree_label = ttk.Label(tree_frame, text='Pedido')
-        tree_label.pack()
-
-        tree = ttk.Treeview(tree_frame, selectmode='browse')
-        tree['columns'] = ('Codigo', 'Cantidad', 'Producto', 'Guarani', 'Dolar')
-        tree.column('#0', width=0, stretch=tk.NO)
-        tree.column('Codigo')
-        tree.column('Cantidad')
-        tree.column('Producto')
-        tree.column('Guarani')
-        tree.column('Dolar')
-
-        tree.heading('Codigo', text='Codigo')
-        tree.heading('Cantidad', text='Cantidad')
-        tree.heading('Producto', text='Producto')
-        tree.heading('Guarani', text='Guarani')
-        tree.heading('Dolar', text='Dolar')
-        tree.pack()
-
-    # Agregar los mismos datos del Treeview original al nuevo Treeview en la ventana modal
-        for item in self.tree.get_children():
-            values = self.tree.item(item, "values")
-            tree.insert('', END, values=values)
-
-        # Lista que almacenará los elementos eliminados y si deben ser restaurados
-        self.elementos_eliminados[top] = []
-
-         # Frame para contener los botones en una fila
-        btn_frame = tk.Frame(top)
-        btn_frame.pack()
-
-    # Botón Eliminar
-        btn_eliminar = Button(btn_frame, text='Eliminar', command=lambda: self.eliminar_pedido(tree))
-        btn_eliminar.pack(side=LEFT, padx=5)
-
-    # Botón Restaurar
-        btn_restaurar = Button(btn_frame, text='Restaurar', command=lambda: self.restaurar_pedido(tree))
-        btn_restaurar.pack(side=LEFT, padx=5)
-
-    # Botón Imagen
-        btn_imagen = Button(btn_frame, text='Imagen', command=lambda: self.guardar_imagen(tree))
-        btn_imagen.pack(side=LEFT, padx=5)
-
-    # Botón PDF
-        btn_pdf = Button(btn_frame, text='PDF', command=lambda: self.guardar_pdf(tree))
-        btn_pdf.pack(side=LEFT, padx=5)
-
-    def eliminar_pedido(self, tree, top):
-    # Obtener el elemento seleccionado en el Treeview de la ventana modal
-        selection = tree.selection()
-        if selection:
-        # Obtener los valores del elemento seleccionado en el Treeview
-            values = tree.item(selection, "values")
-        # Eliminar el elemento de la lista y del Treeview
-            tree.delete(selection)
-        # Actualizar el total en la ventana principal
-            self.actualizar_total()
-        # Guardar el elemento eliminado en la lista temporal específica para la ventana modal
-            self.elementos_eliminados[top].append(values)
-
-    def restaurar_pedido(self, tree, top):
-    # Obtener los elementos eliminados específicos de la ventana modal
-        elementos_eliminados = self.elementos_eliminados.get(top, [])
-        seleccionados = []
-        for index, values in enumerate(elementos_eliminados):
-            seleccionados.append((index, values))
-        if seleccionados:
-            top_restaurar = Toplevel()
-            top_restaurar.title('Restaurar Pedido')
-            top_restaurar.geometry('600x400')
-
-            tree_frame = tk.Frame(top_restaurar)
-            tree_frame.pack(fill=BOTH, expand=True)
-
-            tree_label = ttk.Label(tree_frame, text='Productos Eliminados')
-            tree_label.pack()
-
-            tree_restaurar = ttk.Treeview(tree_frame, selectmode='browse')
-            tree_restaurar['columns'] = ('Codigo', 'Cantidad', 'Producto', 'Guarani', 'Dolar')
-            tree_restaurar.column('#0', width=0, stretch=tk.NO)
-            tree_restaurar.column('Codigo')
-            tree_restaurar.column('Cantidad')
-            tree_restaurar.column('Producto')
-            tree_restaurar.column('Guarani')
-            tree_restaurar.column('Dolar')
-
-            tree_restaurar.heading('Codigo', text='Codigo')
-            tree_restaurar.heading('Cantidad', text='Cantidad')
-            tree_restaurar.heading('Producto', text='Producto')
-            tree_restaurar.heading('Guarani', text='Guarani')
-            tree_restaurar.heading('Dolar', text='Dolar')
-            tree_restaurar.pack()
-
-            for index, values in seleccionados:
-                tree_restaurar.insert('', END, values=values)
-
-            btn_restaurar_seleccionados = Button(top_restaurar, text='Restaurar Seleccionados',
-                                                command=lambda: self.restaurar_seleccionados(tree, top, tree_restaurar))
-            btn_restaurar_seleccionados.pack()
-
-    def restaurar_seleccionados(self, tree, top, top_restaurar):
-    # Obtener los elementos seleccionados en el Treeview de la ventana modal de restaurar
-        selection = top_restaurar.selection()
-        seleccionados = []
-        if selection:
-            for item in selection:
-                seleccionados.append(top_restaurar.item(item, "values"))
-
-    # Restaurar los elementos seleccionados en el Treeview principal
-        for item in seleccionados:
-            tree.insert('', END, values=item)
-
-    # Eliminar los elementos seleccionados del Treeview de la ventana modal de restaurar
-        for item in selection:
-            top_restaurar.delete(item)
-
     def mostrar_cuadro_dialogo_pedido(self):
         # Obtener los productos del Treeview
-            productos = [self.tree.set(item, "Producto") for item in self.tree.get_children()]
+        productos = [self.tree.set(item, "Producto") for item in self.tree.get_children()]
 
-        # Mostrar el cuadro de diálogo
-            dialog = tk.Toplevel()
-            dialog.title("Seleccionar elementos para el Pedido")
+    # Mostrar el cuadro de diálogo
+        dialog = tk.Toplevel()
+        dialog.title("Seleccionar elementos")
+        #dialog.geometry("400x400")
 
-            label = tk.Label(dialog, text="Seleccione los elementos que desea incluir en el pedido:")
-            label.pack()
+        label = tk.Label(dialog, text="Seleccione los elementos que desea incluir en el presupuesto:")
+        label.pack()
 
-            items_var = []
-            for producto in productos:
-                var = tk.IntVar(value=1)  # Inicialmente, todos los elementos están marcados
-                items_var.append(var)
-                radio_btn = tk.Radiobutton(dialog, text=producto, variable=var, value=1)
-                radio_btn.pack(anchor=tk.W)
+        items_var = []
+        for producto in productos:
+            var = tk.IntVar(value=1)  # Inicialmente, todos los elementos están marcados
+            items_var.append(var)
+            check_btn = tk.Checkbutton(dialog, text=producto, variable=var, onvalue=1, offvalue=0)
+            check_btn.pack(anchor=tk.W)
 
-            def generar_pdf_pedido():
-                selected_items = [
-                    producto for producto, var in zip(productos, items_var) if var.get() == 1
+        def generar_pdf_pedido():
+            selected_items = [
+                producto for producto, var in zip(productos, items_var) if var.get() == 1
+            ]
+            dialog.destroy()
+            self.generar_pdf_pedido(selected_items)
+
+        def generar_img_pedido():
+            selected_items = [
+                producto for producto, var in zip(productos, items_var) if var.get() == 1
                 ]
-                dialog.destroy()
-                self.generar_pedido_pdf(selected_items)
+            dialog.destroy()
+            self.generar_pedido_img(selected_items)
 
-            def generar_img_pedido():
-                selected_items = [
-                    producto for producto, var in zip(productos, items_var) if var.get() == 1
-                ]
-                dialog.destroy()
-                self.generar_pedido_img(selected_items)
+        button_frame = tk.Frame(dialog)
+        button_frame.pack(pady=10)
 
-            
-            button_frame = tk.Frame(dialog)
-            button_frame.pack(pady=10)
+        btn_generar_pdf = tk.Button(button_frame, text="Generar PDF", command=generar_pdf_pedido)
+        btn_generar_pdf.pack(side=tk.LEFT, padx=10, pady=5)  # Ubicar a la izquierda con un espaciado
 
-            btn_generar_pdf = tk.Button(button_frame, text="Generar PDF", command=generar_pdf_pedido)
-            btn_generar_pdf.pack(side=tk.LEFT, padx=10, pady=5)  # Ubicar a la izquierda con un espaciado
-
-            btn_generar_img = tk.Button(button_frame, text="Generar Imagen", command=generar_img_pedido)
-            btn_generar_img.pack(side=tk.LEFT, padx=10, pady=5)  # Ubicar a la izquierda con un espaciado
+        btn_generar_img = tk.Button(button_frame, text="Generar Imagen", command=generar_img_pedido)
+        btn_generar_img.pack(side=tk.LEFT, padx=10, pady=5)  # Ubicar a la izquierda con un espaciado
 
         # Hacer que el cuadro de diálogo se adapte a su contenido
-            dialog.update_idletasks()
-            dialog.geometry(f"{dialog.winfo_reqwidth()}x{dialog.winfo_reqheight()}")
+        dialog.update_idletasks()
+        dialog.geometry(f"{dialog.winfo_reqwidth()}x{dialog.winfo_reqheight()}")
 
-            dialog.mainloop()
+        dialog.mainloop()
 
-    def generar_pedido_pdf(self, items_a_imprimir):
-        # Tu código para generar el PDF del pedido aquí...
-        pass
+    def generar_pdf_pedido(self, items_a_imprimir):
+        # Obtener el nombre del cliente seleccionado del Combobox
+        cliente = self.combo.get()
+
+        # Obtener la fecha actual
+        fecha_actual = datetime.datetime.now().strftime("%d_%m_%y")
+
+        # Sugerir el nombre de archivo con el título "Pedido" y la fecha actual
+        nombre_archivo_sugerido = f"Pedido_{cliente}_{fecha_actual}.pdf"
+
+        # Solicitar la ubicación y el nombre del archivo
+        file_path = filedialog.asksaveasfilename(
+            defaultextension=".pdf", filetypes=[("PDF Files", "*.pdf")], initialfile=nombre_archivo_sugerido
+        )
+
+        if not file_path:
+            # El usuario canceló la selección o no ingresó un nombre de archivo
+            return
+
+        # Crear el lienzo del PDF
+        pdf = canvas.Canvas(file_path, pagesize=letter)
+
+        # Configuración de fuentes
+        pdf.setFont("Times-Bold", 14)
+        pdf.setFont("Times-Bold", 12)
+
+        # Título
+        pdf.drawCentredString(300, 700, "Pedido")
+
+        # Subtítulo Productos Seleccionados
+        pdf.setFont("Times-Bold", 12)
+        pdf.drawString(50, 620, "Productos")
+
+        # Imprimir los productos seleccionados como párrafos
+        y = 600
+        for producto in items_a_imprimir:
+            pdf.setFont("Times-Bold", 12)
+            pdf.drawString(70, y, producto)
+            y -= 20
+
+        # Guardar el PDF y cerrar el lienzo
+        pdf.save()
+
+        # Mostrar mensaje de éxito
+        messagebox.showinfo("PDF Generado", "El PDF se generó correctamente.")
 
     def generar_pedido_img(self, items_a_imprimir):
         # Tu código para generar la imagen del pedido aquí...
@@ -513,7 +430,7 @@ class PresupuestoApp:
 
     def generar_presupuesto_clicked(self):
         # Obtener el nombre del cliente seleccionado del Combobox
-        cliente = self.combo.get()
+        #cliente = self.combo.get()
         # Mostrar el cuadro de diálogo para seleccionar los elementos a incluir en el PDF
         items_a_imprimir = self.mostrar_cuadro_dialogo_items()
 
