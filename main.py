@@ -11,6 +11,7 @@ import datetime
 import decimal
 import re
 from tkinter import simpledialog
+from PIL import Image, ImageDraw, ImageFont
 
 
 def conectar():
@@ -425,8 +426,44 @@ class PresupuestoApp:
         messagebox.showinfo("PDF Generado", "El PDF se generó correctamente.")
 
     def generar_pedido_img(self, items_a_imprimir):
-        # Tu código para generar la imagen del pedido aquí...
-        pass
+    # Obtener el nombre del cliente seleccionado del Combobox
+        cliente = self.combo.get()
+
+    # Obtener la fecha actual
+        fecha_actual = datetime.datetime.now().strftime("%Y-%m-%d")
+
+    # Sugerir el nombre de archivo con el título "Pedido" y el nombre del cliente y fecha actual
+        nombre_archivo_sugerido = f"Pedido_{cliente}_{fecha_actual}.png"
+
+    # Solicitar la ubicación y el nombre del archivo
+        file_path = filedialog.asksaveasfilename(
+            defaultextension=".png", filetypes=[("PNG Files", "*.png")], initialfile=nombre_archivo_sugerido
+        )
+
+        if not file_path:
+        # El usuario canceló la selección o no ingresó un nombre de archivo
+            return
+
+    # Crear la imagen
+        img = Image.new('RGB', (400, 200), color=(255, 255, 255))
+        draw = ImageDraw.Draw(img)
+        font = ImageFont.truetype("arial.ttf", 15)
+
+    # Escribir el título
+        draw.text((10, 10), f"Pedido de {cliente}", fill=(0, 0, 0), font=font)
+
+    # Escribir los productos seleccionados
+        y = 30
+        for producto in items_a_imprimir:
+            draw.text((20, y), producto, fill=(0, 0, 0), font=font)
+            y += 20
+
+    # Guardar la imagen
+        img.save(file_path)
+
+    # Mostrar mensaje de éxito
+        messagebox.showinfo("Imagen Generada", "La imagen se generó correctamente.")
+
 
     def generar_presupuesto_clicked(self):
         # Obtener el nombre del cliente seleccionado del Combobox
