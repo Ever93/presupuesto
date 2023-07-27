@@ -4,6 +4,7 @@ from tkinter import messagebox, ttk, filedialog
 import tkinter as tk
 import subprocess
 from cliente import CRMApp
+from proveedores import ProveedoresApp
 import locale
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
@@ -51,6 +52,7 @@ class PresupuestoApp:
 
         options_menu = tk.Menu(menu_bar, tearoff=0)
         options_menu.add_command(label="Cliente", command=self.abrir_ventana_crm)
+        options_menu.add_command(label="Proveedores", command=self.abrir_ventana_proveedores)  # Nueva opción para proveedores
         options_menu.add_command(label="Empresa", command=self.opcion_empresa)
 
         menu_bar.add_cascade(label="Archivo", menu=file_menu)
@@ -177,6 +179,10 @@ class PresupuestoApp:
         self.crm_app = CRMApp(self)  # Pasar self como argumento
         self.actualizar_nombres_clientes()  # Actualizar los nombres de clientes en el Combobox
         self.crm_app.mainloop()  # Mostrar la ventana CRMApp
+        
+    def abrir_ventana_proveedores(self):
+        proveedores_app = ProveedoresApp(self)
+        proveedores_app.mainloop()
 
     def opcion_empresa(self):
         pass
