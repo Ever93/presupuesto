@@ -27,6 +27,13 @@ def obtener_nombres_clientes():
     conn.close()
     return nombres
 
+def obtener_nombres_proveedores():
+    conn, c = conectar()
+    c.execute("SELECT nombre FROM proveedores")
+    nombres = c.fetchall()
+    conn.close()
+    return nombres
+
 # Establecer la configuración local para el separador de miles
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
@@ -38,21 +45,24 @@ class PresupuestoApp:
         self.observacion_texto = ""  # Variable de instancia para almacenar el texto de la observación
         self.lbl_cotizacion_value = StringVar()
         self.lbl_interes_value = StringVar()
+        self.selected_cliente = ""  
+        self.selected_proveedor = ""  
         self.create_menu()
         self.create_widgets()
         self.render_clientes()
+        self.render_proveedores()
         self.elementos_eliminados = {}
-    
+
     def create_menu(self):
         menu_bar = tk.Menu(self.root)
         file_menu = tk.Menu(menu_bar, tearoff=0)
         file_menu.add_command(label="Abrir", command=self.abrir_explorador_archivos)
         file_menu.add_separator()
         file_menu.add_command(label="Salir", command=self.root.quit)
-
+        #Menu Opciones
         options_menu = tk.Menu(menu_bar, tearoff=0)
         options_menu.add_command(label="Cliente", command=self.abrir_ventana_crm)
-        options_menu.add_command(label="Proveedores", command=self.abrir_ventana_proveedores)  # Nueva opción para proveedores
+        options_menu.add_command(label="Proveedores", command=self.abrir_ventana_proveedores)
         options_menu.add_command(label="Empresa", command=self.opcion_empresa)
 
         menu_bar.add_cascade(label="Archivo", menu=file_menu)
@@ -63,27 +73,26 @@ class PresupuestoApp:
         frame = tk.Frame(self.root)
         frame.pack()
         Label(frame, text='Sistema', font=('Arial', 14, 'bold'), anchor="w").grid(column=0, row=0)
-
         frame1 = tk.LabelFrame(self.root, text='Presupuesto', padx=10, pady=10, borderwidth=5)
         frame1.pack(padx=10, pady=10)
         
-        combo_frame = tk.Frame(frame1)
-        combo_frame.grid(column=0, row=1)
-        combo_label = ttk.Label(combo_frame, text='Cliente')
-        combo_label.pack(side=tk.LEFT) 
-        self.combo = ttk.Combobox(combo_frame, values=[], postcommand=self.actualizar_coincidencias)  # Utiliza self.combo directamente
-        self.combo.set('')  # Establecer el valor seleccionado en blanco
-        self.combo.pack(side=tk.LEFT)
-        self.combo.bind('<Down>', self.desplegar_lista)  # Agregar el evento 'Down' para desplegar la lista
-        
-        combo_frame = tk.Frame(frame1)
-        combo_frame.grid(column=1, row=1)
-        combo_label = ttk.Label(combo_frame, text='Proveedor')
-        combo_label.pack(side=tk.LEFT)
-        self.combo = ttk.Combobox(combo_frame, values=[], postcommand='')  # Utiliza self.combo directamente
-        self.combo.set('')  # Establecer el valor seleccionado en blanco
-        self.combo.pack(side=tk.LEFT)
-        self.combo.bind('<Down>', self.desplegar_lista)  # Agregar el evento 'Down' para desplegar la lista
+        combo_frame_cliente = tk.Frame(frame1)
+        combo_frame_cliente.grid(column=0, row=1)
+        combo_label_cliente = ttk.Label(combo_frame_cliente, text='Cliente')
+        combo_label_cliente.pack(side=tk.LEFT)
+        self.combo_cliente = ttk.Combobox(combo_frame_cliente, values=[], postcommand=self.actualizar_coincidencias_cliente)
+        self.combo_cliente.set('')  # Set the selected value to empty initially
+        self.combo_cliente.pack(side=tk.LEFT)
+        self.combo_cliente.bind('<<ComboboxSelected>>', self.cliente_selected)  # Add event handler
+       
+        combo_frame_proveedor = tk.Frame(frame1)
+        combo_frame_proveedor.grid(column=1, row=1)
+        combo_label_proveedor = ttk.Label(combo_frame_proveedor, text='Proveedor')
+        combo_label_proveedor.pack(side=tk.LEFT)
+        self.combo_proveedor = ttk.Combobox(combo_frame_proveedor, values=[], postcommand=self.actualizar_coincidencias_proveedor)
+        self.combo_proveedor.set('')  # Set the selected value to empty initially
+        self.combo_proveedor.pack(side=tk.LEFT)
+        self.combo_proveedor.bind('<<ComboboxSelected>>', self.proveedor_selected)  # Add event handler
 
         btn_dolar = tk.Button(frame1, text='Dolar', command=self.dolar_clicked)
         btn_dolar.grid(column=2, row=1)
@@ -142,8 +151,7 @@ class PresupuestoApp:
         observacion_label.pack(anchor='w', padx='20')
 
         self.observacion_frame = Frame(self.root, bd=1, relief='solid',  width=200, height=200)  # Ajusta los valores de width y height según tu preferencia
-        self.observacion_frame.pack(pady=1, padx=35, anchor='w', fill='both')
-        
+        self.observacion_frame.pack(pady=1, padx=35, anchor='w', fill='both')    
 #Aqui se muestra el texto cargado en observacion
         self.observacion_text_label = Label(self.observacion_frame, font=('Times New Roman', 12), text=self.observacion_texto, anchor='w', justify='left')
         self.observacion_text_label.pack(pady=5, padx=5, anchor='w')
@@ -177,8 +185,19 @@ class PresupuestoApp:
     def render_clientes(self):
         nombres_clientes = obtener_nombres_clientes()
         self.clientes = [nombre[0] for nombre in nombres_clientes]
-        self.combo['values'] = self.clientes
-
+        self.combo_cliente['values'] = self.clientes
+    
+    def render_proveedores(self):
+        nombres_proveedores = obtener_nombres_proveedores()
+        self.proveedores = [nombre[0] for nombre in nombres_proveedores]
+        self.combo_proveedor['values'] = self.proveedores
+       
+    def cliente_selected(self, event):
+        self.selected_cliente = self.combo_cliente.get()
+        
+    def proveedor_selected(self, event):
+        self.selected_proveedor = self.combo_proveedor.get()
+    
     def abrir_explorador_archivos(self):
         subprocess.run(["explorer.exe"])
         
@@ -254,8 +273,7 @@ class PresupuestoApp:
         # Actualizar el total
             self.actualizar_total()
 
-    def agregar_producto_clicked(self):
-        
+    def agregar_producto_clicked(self):     
         cotizacion_vacia = self.lbl_cotizacion.cget("text") == "Cotización: "
         interes_vacio = self.lbl_interes.cget("text") == "Interés:"
 
@@ -326,7 +344,6 @@ class PresupuestoApp:
                     self.tree.insert('', END, values=(codigo_val, cantidad_val, producto_val, f'{costo_total_guarani_str}', f'{precio_dolar_val:.2f}'))
                 else:
                     self.tree.insert('', END, values=(codigo_val, cantidad_val, producto_val, costo_total_guarani_str, ''))
-
             # Actualizar el total
                 self.actualizar_total()
             # Cerrar la ventana
@@ -346,36 +363,98 @@ class PresupuestoApp:
 
     def mostrar_cuadro_dialogo_pedido(self):
         # Obtener los productos del Treeview
-        productos = [self.tree.set(item, "Producto") for item in self.tree.get_children()]
+        selected_items = [self.tree.item(item, "values") for item in self.tree.get_children() if self.tree.selection_includes(item)]
 
-    # Mostrar el cuadro de diálogo
+        # Mostrar el cuadro de diálogo
         dialog = tk.Toplevel()
         dialog.title("Seleccionar elementos")
-        #dialog.geometry("400x400")
-
-        label = tk.Label(dialog, text="Seleccione los elementos que desea incluir en el presupuesto:")
+        label = tk.Label(dialog, text="Seleccione los elementos que desea incluir en el pedido:")
         label.pack()
 
         items_var = []
-        for producto in productos:
+        for producto in selected_items:
             var = tk.IntVar(value=1)  # Inicialmente, todos los elementos están marcados
             items_var.append(var)
             check_btn = tk.Checkbutton(dialog, text=producto, variable=var, onvalue=1, offvalue=0)
             check_btn.pack(anchor=tk.W)
 
         def generar_pdf_pedido():
-            selected_items = [
-                producto for producto, var in zip(productos, items_var) if var.get() == 1
-            ]
+            selected_items = [producto for producto, var in zip(selected_items, items_var) if var.get() == 1]
             dialog.destroy()
-            self.generar_pdf_pedido(selected_items)
 
-        def generar_img_pedido():
-            selected_items = [
-                producto for producto, var in zip(productos, items_var) if var.get() == 1
-                ]
-            dialog.destroy()
-            self.generar_pedido_img(selected_items)
+            # Obtener el nombre del cliente seleccionado del Combobox
+            cliente = self.combo_cliente.get()
+            proveedor = self.combo_proveedor.get()
+            # Obtener la fecha actual
+            fecha_actual = datetime.datetime.now().strftime("%d_%m_%y")
+            # Sugerir el nombre de archivo con el título "Pedido" y la fecha actual
+            nombre_archivo_sugerido = f"Pedido_{cliente}_{fecha_actual}.pdf"
+
+            # Solicitar la ubicación y el nombre del archivo
+            file_path = filedialog.asksaveasfilename(
+                defaultextension=".pdf", filetypes=[("PDF Files", "*.pdf")], initialfile=nombre_archivo_sugerido
+            )
+
+            if not file_path:
+                # El usuario canceló la selección o no ingresó un nombre de archivo
+                return
+            # Crear el lienzo del PDF
+            pdf = canvas.Canvas(file_path, pagesize=letter)
+            # Configuración de fuentes
+            pdf.setFont("Times-Bold", 14)
+            pdf.setFont("Times-Bold", 12)
+
+            # Título
+            pdf.drawCentredString(300, 700, "Pedido")
+
+            # Proveedor
+            pdf.setFont("Times-Bold", 12)
+            pdf.drawString(50, 650, f"Proveedor: {proveedor}")
+            
+            # Subtítulo Productos Seleccionados
+            pdf.setFont("Times-Bold", 12)
+            pdf.drawString(50, 620, "Productos")
+
+            # Datos para la tabla
+            columnas = ('Codigo', 'Cantidad', 'Producto')
+            filas = []
+
+            for item in selected_items:
+                codigo = item[0]
+                cantidad = item[1]
+                producto = item[2]
+                fila = (codigo, cantidad, producto)
+                filas.append(fila)
+
+            # Coordenadas de inicio de la tabla
+            x_start = 50
+            y_start = 600
+
+            # Ancho de columna
+            col_width = 100
+
+            # Altura de fila
+            row_height = 20
+
+            # Dibujar la tabla con bordes en cada celda
+            for i, columna in enumerate(columnas):
+                pdf.drawString(x_start + i * col_width, y_start, columna)
+                pdf.rect(x_start + i * col_width, y_start, col_width, row_height)
+
+            # Dibujar las filas
+            y_offset = y_start - row_height
+            for fila in filas:
+                for i, dato in enumerate(fila):
+                    pdf.drawString(x_start + i * col_width, y_offset, str(dato))
+                    pdf.rect(x_start + i * col_width, y_offset, col_width, row_height)
+
+                y_offset -= row_height
+
+            # Guardar el PDF y cerrar el lienzo
+            pdf.save()
+
+            # Mostrar mensaje de éxito
+            messagebox.showinfo("PDF Generado", "El PDF se generó correctamente.")
 
         button_frame = tk.Frame(dialog)
         button_frame.pack(pady=10)
@@ -383,65 +462,14 @@ class PresupuestoApp:
         btn_generar_pdf = tk.Button(button_frame, text="Generar PDF", command=generar_pdf_pedido)
         btn_generar_pdf.pack(side=tk.LEFT, padx=10, pady=5)  # Ubicar a la izquierda con un espaciado
 
-        btn_generar_img = tk.Button(button_frame, text="Generar Imagen", command=generar_img_pedido)
-        btn_generar_img.pack(side=tk.LEFT, padx=10, pady=5)  # Ubicar a la izquierda con un espaciado
-
         # Hacer que el cuadro de diálogo se adapte a su contenido
         dialog.update_idletasks()
         dialog.geometry(f"{dialog.winfo_reqwidth()}x{dialog.winfo_reqheight()}")
-
         dialog.mainloop()
-
-    def generar_pdf_pedido(self, items_a_imprimir):
-        # Obtener el nombre del cliente seleccionado del Combobox
-        cliente = self.combo.get()
-
-        # Obtener la fecha actual
-        fecha_actual = datetime.datetime.now().strftime("%d_%m_%y")
-
-        # Sugerir el nombre de archivo con el título "Pedido" y la fecha actual
-        nombre_archivo_sugerido = f"Pedido_{cliente}_{fecha_actual}.pdf"
-
-        # Solicitar la ubicación y el nombre del archivo
-        file_path = filedialog.asksaveasfilename(
-            defaultextension=".pdf", filetypes=[("PDF Files", "*.pdf")], initialfile=nombre_archivo_sugerido
-        )
-
-        if not file_path:
-            # El usuario canceló la selección o no ingresó un nombre de archivo
-            return
-
-        # Crear el lienzo del PDF
-        pdf = canvas.Canvas(file_path, pagesize=letter)
-
-        # Configuración de fuentes
-        pdf.setFont("Times-Bold", 14)
-        pdf.setFont("Times-Bold", 12)
-
-        # Título
-        pdf.drawCentredString(300, 700, "Pedido")
-
-        # Subtítulo Productos Seleccionados
-        pdf.setFont("Times-Bold", 12)
-        pdf.drawString(50, 620, "Productos")
-
-        # Imprimir los productos seleccionados como párrafos
-        y = 600
-        for producto in items_a_imprimir:
-            pdf.setFont("Times-Bold", 12)
-            pdf.drawString(70, y, producto)
-            y -= 20
-
-        # Guardar el PDF y cerrar el lienzo
-        pdf.save()
-
-        # Mostrar mensaje de éxito
-        messagebox.showinfo("PDF Generado", "El PDF se generó correctamente.")
 
     def generar_pedido_img(self, items_a_imprimir):
     # Obtener el nombre del cliente seleccionado del Combobox
         cliente = self.combo.get()
-
     # Obtener la fecha actual
         fecha_actual = datetime.datetime.now().strftime("%Y-%m-%d")
 
@@ -461,7 +489,6 @@ class PresupuestoApp:
         img = Image.new('RGB', (400, 200), color=(255, 255, 255))
         draw = ImageDraw.Draw(img)
         font = ImageFont.truetype("arial.ttf", 15)
-
     # Escribir el título
         draw.text((10, 10), f"Pedido de {cliente}", fill=(0, 0, 0), font=font)
 
@@ -470,13 +497,11 @@ class PresupuestoApp:
         for producto in items_a_imprimir:
             draw.text((20, y), producto, fill=(0, 0, 0), font=font)
             y += 20
-
     # Guardar la imagen
         img.save(file_path)
 
     # Mostrar mensaje de éxito
         messagebox.showinfo("Imagen Generada", "La imagen se generó correctamente.")
-
 
     def generar_presupuesto_clicked(self):
         # Obtener el nombre del cliente seleccionado del Combobox
@@ -491,11 +516,9 @@ class PresupuestoApp:
     def mostrar_cuadro_dialogo_items(self):
     # Obtener los productos del Treeview
         productos = [self.tree.set(item, "Producto") for item in self.tree.get_children()]
-
     # Mostrar el cuadro de diálogo
         dialog = tk.Toplevel()
         dialog.title("Seleccionar elementos")
-        #dialog.geometry("400x400")
 
         label = tk.Label(dialog, text="Seleccione los elementos que desea incluir en el presupuesto:")
         label.pack()
@@ -522,10 +545,7 @@ class PresupuestoApp:
 
         btn_generar_img = tk.Button(button_frame, text="Detallar", command='')
         btn_generar_img.pack(side=tk.LEFT, padx=10, pady=5)  # Ubicar a la izquierda con un espaciado
-        #btn_generar = tk.Button(dialog, text="Generar", command=generar_presupuesto)
-        #btn_generar.pack()
-
-        # Hacer que el cuadro de diálogo se adapte a su contenido
+        
         dialog.update_idletasks()
         dialog.geometry(f"{dialog.winfo_reqwidth()}x{dialog.winfo_reqheight()}")
         
@@ -533,14 +553,11 @@ class PresupuestoApp:
         
     def generar_presupuesto_clicked_with_items(self, items_a_imprimir):
     # Obtener el nombre del cliente seleccionado del Combobox
-        cliente = self.combo.get()
-
+        cliente = self.combo_cliente.get()
     # Obtener la fecha actual
         fecha_actual = datetime.datetime.now().strftime("%Y-%m-%d")
-
     # Sugerir el nombre de archivo con la fecha y el nombre del cliente
         nombre_archivo = f"Presupuesto_{cliente}_{fecha_actual}.pdf"
-
     # Solicitar la ubicación y el nombre del archivo
         file_path = filedialog.asksaveasfilename(
             defaultextension=".pdf", filetypes=[("PDF Files", "*.pdf")], initialfile=nombre_archivo
@@ -549,14 +566,11 @@ class PresupuestoApp:
         if not file_path:
         # El usuario canceló la selección o no ingresó un nombre de archivo
             return
-
     # Crear el lienzo del PDF
         pdf = canvas.Canvas(file_path, pagesize=letter)
-
     # Configuración de fuentes
         pdf.setFont("Times-Bold", 14)
         pdf.setFont("Times-Bold", 12)
-
     # Título
         pdf.drawCentredString(300, 700, "Presupuesto Equipo de Computo")
 
@@ -579,13 +593,9 @@ class PresupuestoApp:
         pdf.drawString(50, y - 40, "Precio:")
         total = self.total_label.cget("text").split(": ")[1]
         pdf.drawString(100, y - 40, total + " contado con IVA incluido")
-
-    # Guardar el PDF y cerrar el lienzo
         pdf.save()
-
     # Mostrar mensaje de éxito
         messagebox.showinfo("PDF Generado", "El PDF se generó correctamente.")
-
 
     def guardar_cotizacion(self, cotizacion, top):
         self.lbl_cotizacion.config(text='Cotización: ' + cotizacion)
@@ -600,11 +610,22 @@ class PresupuestoApp:
         self.clientes = [nombre[0] for nombre in nombres_clientes]
         self.combo['values'] = self.clientes
         self.combo.current(0)  # Establecer la selección en el primer elemento de la lista
-
-    def actualizar_coincidencias(self):
-        texto_ingresado = self.combo.get()
+        
+    def actualizar_nombres_proveedores(self):
+        nombres_proveedores = obtener_nombres_proveedores()
+        self.proveedores = [nombre[0] for nombre in nombres_proveedores]
+        self.combo['values'] = self.proveedores
+        self.combo.current(0)
+        
+    def actualizar_coincidencias_cliente(self):
+        texto_ingresado = self.combo_cliente.get()
         coincidencias = [cliente for cliente in self.clientes if re.search(texto_ingresado, cliente, re.IGNORECASE)]
-        self.combo['values'] = coincidencias[:5]  # Mostrar solo las primeras 5 coincidencias
+        self.combo_cliente['values'] = coincidencias[:5]  # Show only the first 5 matches
+
+    def actualizar_coincidencias_proveedor(self):
+        texto_ingresado = self.combo_proveedor.get()
+        coincidencias = [proveedor for proveedor in self.proveedores if re.search(texto_ingresado, proveedor, re.IGNORECASE)]
+        self.combo_proveedor['values'] = coincidencias[:5] 
         
     def desplegar_lista(self, event):
         self.combo.event_generate('<<ComboboxSelected>>')  # Generar el evento '<<ComboboxSelected>>' para desplegar la lista
