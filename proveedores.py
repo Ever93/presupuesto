@@ -11,67 +11,61 @@ class ProveedoresApp(Tk):
 
         self.conn, self.c = conectar()
 
-        self.nombre_var = StringVar(value="")
-        self.telefono_var = StringVar(value="")
-        self.direccion_var = StringVar(value="")
-
-        # Función para renderizar los proveedores en el árbol
         def render_proveedores():
             rows = self.c.execute("SELECT * FROM proveedores").fetchall()
             self.tree.delete(*self.tree.get_children())
             for row in rows:
                 self.tree.insert('', END, row[0], values=(row[1], row[2], row[3]))
+                
 
-        def insertar(proveedor):
+        def insertar(proveedores):
             self.c.execute("""
                 INSERT INTO proveedores (nombre, telefono, direccion) VALUES (?, ?, ?)
-                """, (proveedor['nombre'], proveedor['telefono'], proveedor['direccion']))
+                """, (proveedores['nombre'], proveedores['telefono'], proveedores['direccion']))
             self.conn.commit()
+            self.parent.actualizar_nombres_proveedores()
             render_proveedores()
 
         def nuevo_proveedor():
             def guardar():
-                nombre = self.nombre_var.get()
-                telefono = self.telefono_var.get()
-                direccion = self.direccion_var.get()
-
-                if not nombre:
+                
+                if not nombre.get():
                     messagebox.showerror('Error', 'El nombre es obligatorio')
                     return
-                if not telefono:
+                if not telefono.get():
                     messagebox.showerror('Error', 'El teléfono es obligatorio')
                     return
-                if not direccion:
+                if not direccion.get():
                     messagebox.showerror('Error', 'La dirección es obligatoria')
                     return
 
-                proveedor = {
-                    'nombre': nombre,
-                    'telefono': telefono,
-                    'direccion': direccion
+                proveedores = {
+                    'nombre': nombre.get(),
+                    'telefono': telefono.get(),
+                    'direccion': direccion.get()
                 }
 
-                insertar(proveedor)
+                insertar(proveedores)
                 top.destroy()
 
             # Definimos una subventana
             top = Toplevel()
             top.title('Nuevo Proveedor')
 
-            label_nombre = Label(top, text='Nombre:')
-            label_nombre.grid(row=0, column=0, padx=5, pady=5)
-            entry_nombre = Entry(top, textvariable=self.nombre_var, width=40)
-            entry_nombre.grid(row=0, column=1, padx=5, pady=5)
+            lnombre = Label(top, text='Nombre:')
+            nombre = Entry(top, width=40)
+            lnombre.grid(row=0, column=0, padx=5, pady=5)
+            nombre.grid(row=0, column=1, padx=5, pady=5)
 
-            label_telefono = Label(top, text='Teléfono:')
-            label_telefono.grid(row=1, column=0, padx=5, pady=5)
-            entry_telefono = Entry(top, textvariable=self.telefono_var, width=40)
-            entry_telefono.grid(row=1, column=1, padx=5, pady=5)
+            ltelefono = Label(top, text='Teléfono:')
+            telefono = Entry(top, width=40)
+            ltelefono.grid(row=1, column=0, padx=5, pady=5)
+            telefono.grid(row=1, column=1, padx=5, pady=5)
 
-            label_direccion = Label(top, text='Dirección:')
-            label_direccion.grid(row=2, column=0, padx=5, pady=5)
-            entry_direccion = Entry(top, textvariable=self.direccion_var, width=40)
-            entry_direccion.grid(row=2, column=1, padx=5, pady=5)
+            ldireccion = Label(top, text='Dirección:')
+            direccion = Entry(top, width=40)
+            ldireccion.grid(row=2, column=0, padx=5, pady=5)
+            direccion.grid(row=2, column=1, padx=5, pady=5)
 
             btn_guardar = Button(top, text='Guardar', command=guardar)
             btn_guardar.grid(row=3, column=1)
@@ -80,18 +74,16 @@ class ProveedoresApp(Tk):
             top.mainloop()
 
         def eliminar_proveedor():
-            selected_item = self.tree.selection()
-            if not selected_item:
-                messagebox.showerror('Error', 'Selecciona un proveedor para eliminar')
-                return
-            
-            respuesta = messagebox.askokcancel('Seguro', 'Estás seguro de querer eliminar el proveedor seleccionado?')
+            id = self.tree.selection()[0]
+            proveedor = self.c.execute("SELECT * FROM proveedores where id = ?", (id,)).fetchone()
+            respuesta = messagebox.askokcancel('Seguro', 'Estas seguro de querer eliminar el proveedor ' + proveedor[1] + '?')
             if respuesta:
-                id_proveedor = self.tree.item(selected_item, 'text')
-                self.c.execute("DELETE FROM proveedores WHERE id = ?", (id_proveedor,))
+                self.c.execute("DELETE FROM proveedores where id = ?", (id,))
                 self.conn.commit()
                 render_proveedores()
-
+            else:
+                pass
+            
         btn_nuevo_proveedor = Button(self, text='Nuevo proveedor', command=nuevo_proveedor)
         btn_nuevo_proveedor.grid(column=0, row=0)
 
