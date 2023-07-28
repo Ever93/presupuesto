@@ -67,32 +67,39 @@ class PresupuestoApp:
         frame1 = tk.LabelFrame(self.root, text='Presupuesto', padx=10, pady=10, borderwidth=5)
         frame1.pack(padx=10, pady=10)
         
-
         combo_frame = tk.Frame(frame1)
         combo_frame.grid(column=0, row=1)
         combo_label = ttk.Label(combo_frame, text='Cliente')
-        combo_label.pack(side=tk.LEFT)
-        
+        combo_label.pack(side=tk.LEFT) 
         self.combo = ttk.Combobox(combo_frame, values=[], postcommand=self.actualizar_coincidencias)  # Utiliza self.combo directamente
         self.combo.set('')  # Establecer el valor seleccionado en blanco
         self.combo.pack(side=tk.LEFT)
         self.combo.bind('<Down>', self.desplegar_lista)  # Agregar el evento 'Down' para desplegar la lista
         
+        combo_frame = tk.Frame(frame1)
+        combo_frame.grid(column=1, row=1)
+        combo_label = ttk.Label(combo_frame, text='Proveedor')
+        combo_label.pack(side=tk.LEFT)
+        self.combo = ttk.Combobox(combo_frame, values=[], postcommand='')  # Utiliza self.combo directamente
+        self.combo.set('')  # Establecer el valor seleccionado en blanco
+        self.combo.pack(side=tk.LEFT)
+        self.combo.bind('<Down>', self.desplegar_lista)  # Agregar el evento 'Down' para desplegar la lista
+
         btn_dolar = tk.Button(frame1, text='Dolar', command=self.dolar_clicked)
-        btn_dolar.grid(column=1, row=1)
+        btn_dolar.grid(column=2, row=1)
         self.lbl_cotizacion = Label(frame1, text='Cotización: ')
-        self.lbl_cotizacion.grid(column=1, row=0)
+        self.lbl_cotizacion.grid(column=2, row=0)
 
         btn_porcentaje = tk.Button(frame1, text='%', command=self.porcentaje_clicked)
-        btn_porcentaje.grid(column=2, row=1)
+        btn_porcentaje.grid(column=3, row=1)
         self.lbl_interes = Label(frame1, text='Interés:')
-        self.lbl_interes.grid(column=2, row=0)
+        self.lbl_interes.grid(column=3, row=0)
 
         btn_eliminar_producto = tk.Button(frame1, text='Eliminar Producto', command=self.eliminar_producto_clicked)
-        btn_eliminar_producto.grid(column=3, row=1)
+        btn_eliminar_producto.grid(column=4, row=1)
 
         btn_agregar_producto = tk.Button(frame1, text='Agregar Producto', command=self.agregar_producto_clicked)
-        btn_agregar_producto.grid(column=4, row=1)
+        btn_agregar_producto.grid(column=5, row=1)
 
         self.total_guarani = 0
         self.total_label = Label(frame1, text='Total:', font=('Arial', 12, 'bold'), anchor="w")
@@ -111,7 +118,7 @@ class PresupuestoApp:
         btn_generar_presupuesto.grid(column=4, row=3)
 
         tree_frame = tk.Frame(frame1)
-        tree_frame.grid(column=0, row=2, columnspan=5)
+        tree_frame.grid(column=0, row=2, columnspan=6)
         tree_label = ttk.Label(tree_frame, text='Presupuesto')
         tree_label.pack()
 
