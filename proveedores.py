@@ -23,7 +23,7 @@ class ProveedoresApp(Tk):
                 INSERT INTO proveedores (nombre, telefono, direccion) VALUES (?, ?, ?)
                 """, (proveedores['nombre'], proveedores['telefono'], proveedores['direccion']))
             self.conn.commit()
-            self.parent.actualizar_nombres_proveedores()
+            
             render_proveedores()
 
         def nuevo_proveedor():
