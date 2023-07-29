@@ -120,7 +120,7 @@ class PresupuestoApp:
         btn_guardar_pedido = tk.Button(frame1, text='Guardar', command=self.guardar_pedido_clicked)
         btn_guardar_pedido.grid(column=1, row=3)
         
-        btn_generar_pedido = tk.Button(frame1, text='Pedido', command=self.mostrar_cuadro_dialogo_pedido)
+        btn_generar_pedido = tk.Button(frame1, text='Pedido', command=self.generar_pedido_clicked)
         btn_generar_pedido.grid(column=3, row=3)
 
         btn_generar_presupuesto = tk.Button(frame1, text='Presupuesto', command=self.generar_presupuesto_clicked)
@@ -360,11 +360,22 @@ class PresupuestoApp:
 
     def guardar_pedido_clicked(self):
         pass
-
+    
+    def generar_pedido_clicked(self):
+        items_a_imprimir_pedido = self.mostrar_cuadro_dialogo_pedido()
+        if items_a_imprimir_pedido is None:
+            return
+        
     def mostrar_cuadro_dialogo_pedido(self):
         # Obtener los productos del Treeview
-        selected_items = [self.tree.item(item, "values") for item in self.tree.get_children() if self.tree.selection_includes(item)]
-
+        productos = [
+            (
+            self.tree.set(item, "Codigo"),
+            self.tree.set(item, "Cantidad"),
+            self.tree.set(item, "Producto"),
+            )
+            for item in self.tree.get_children()
+        ]
         # Mostrar el cuadro de diálogo
         dialog = tk.Toplevel()
         dialog.title("Seleccionar elementos")
@@ -372,59 +383,80 @@ class PresupuestoApp:
         label.pack()
 
         items_var = []
-        for producto in selected_items:
+        for producto in productos:
             var = tk.IntVar(value=1)  # Inicialmente, todos los elementos están marcados
             items_var.append(var)
-            check_btn = tk.Checkbutton(dialog, text=producto, variable=var, onvalue=1, offvalue=0)
+            check_btn = tk.Checkbutton(
+                dialog,
+                text=producto[2],  # Usamos el nombre del producto como etiqueta
+                variable=var,
+                onvalue=1,
+                offvalue=0
+            )
             check_btn.pack(anchor=tk.W)
 
-        def generar_pdf_pedido():
-            selected_items = [producto for producto, var in zip(selected_items, items_var) if var.get() == 1]
+        def generar_pedido():
+            selected_items = [
+                producto for producto, var in zip(productos, items_var) if var.get() == 1
+            ]
             dialog.destroy()
+            self.generar_pedido_clicked_with_items(selected_items)
+            
+        button_frame = tk.Frame(dialog)
+        button_frame.pack(pady=10)
 
+        btn_generar_pdf = tk.Button(button_frame, text="Generar PDF", command=generar_pedido)
+        btn_generar_pdf.pack(side=tk.LEFT, padx=10, pady=5)  # Ubicar a la izquierda con un espaciado
+
+        # Hacer que el cuadro de diálogo se adapte a su contenido
+        dialog.update_idletasks()
+        dialog.geometry(f"{dialog.winfo_reqwidth()}x{dialog.winfo_reqheight()}")
+        dialog.mainloop()
+
+    def generar_pedido_clicked_with_items(self, items_a_imprimir_pedido):
             # Obtener el nombre del cliente seleccionado del Combobox
-            cliente = self.combo_cliente.get()
-            proveedor = self.combo_proveedor.get()
+        cliente = self.combo_cliente.get()
+        proveedor = self.combo_proveedor.get()
             # Obtener la fecha actual
-            fecha_actual = datetime.datetime.now().strftime("%d_%m_%y")
+        fecha_actual = datetime.datetime.now().strftime("%d_%m_%y")
             # Sugerir el nombre de archivo con el título "Pedido" y la fecha actual
-            nombre_archivo_sugerido = f"Pedido_{cliente}_{fecha_actual}.pdf"
+        nombre_archivo_sugerido = f"Pedido_{cliente}_{fecha_actual}.pdf"
 
             # Solicitar la ubicación y el nombre del archivo
-            file_path = filedialog.asksaveasfilename(
-                defaultextension=".pdf", filetypes=[("PDF Files", "*.pdf")], initialfile=nombre_archivo_sugerido
-            )
+        file_path = filedialog.asksaveasfilename(
+            defaultextension=".pdf", filetypes=[("PDF Files", "*.pdf")], initialfile=nombre_archivo_sugerido
+        )
 
-            if not file_path:
+        if not file_path:
                 # El usuario canceló la selección o no ingresó un nombre de archivo
-                return
+            return
             # Crear el lienzo del PDF
-            pdf = canvas.Canvas(file_path, pagesize=letter)
+        pdf = canvas.Canvas(file_path, pagesize=letter)
             # Configuración de fuentes
-            pdf.setFont("Times-Bold", 14)
-            pdf.setFont("Times-Bold", 12)
+        pdf.setFont("Times-Bold", 14)
+        pdf.setFont("Times-Bold", 12)
 
             # Título
-            pdf.drawCentredString(300, 700, "Pedido")
+        pdf.drawCentredString(300, 700, "Pedido")
 
             # Proveedor
-            pdf.setFont("Times-Bold", 12)
-            pdf.drawString(50, 650, f"Proveedor: {proveedor}")
+        pdf.setFont("Times-Bold", 12)
+        pdf.drawString(50, 650, f"Proveedor: {proveedor}")
             
             # Subtítulo Productos Seleccionados
-            pdf.setFont("Times-Bold", 12)
-            pdf.drawString(50, 620, "Productos")
+        pdf.setFont("Times-Bold", 12)
+        pdf.drawString(50, 620, "Productos")
 
             # Datos para la tabla
-            columnas = ('Codigo', 'Cantidad', 'Producto')
-            filas = []
+        columnas = ('Codigo', 'Cantidad', 'Producto')
+        filas = []
 
-            for item in selected_items:
-                codigo = item[0]
-                cantidad = item[1]
-                producto = item[2]
-                fila = (codigo, cantidad, producto)
-                filas.append(fila)
+        for item in items_a_imprimir_pedido:
+            codigo = item[0]
+            cantidad = item[1]
+            producto = item[2]
+            fila = (codigo, cantidad, producto)
+            filas.append(fila)
 
             # Coordenadas de inicio de la tabla
             x_start = 50
@@ -437,9 +469,9 @@ class PresupuestoApp:
             row_height = 20
 
             # Dibujar la tabla con bordes en cada celda
-            for i, columna in enumerate(columnas):
-                pdf.drawString(x_start + i * col_width, y_start, columna)
-                pdf.rect(x_start + i * col_width, y_start, col_width, row_height)
+        for i, columna in enumerate(columnas):
+            pdf.drawString(x_start + i * col_width, y_start, columna)
+            pdf.rect(x_start + i * col_width, y_start, col_width, row_height)
 
             # Dibujar las filas
             y_offset = y_start - row_height
@@ -456,16 +488,6 @@ class PresupuestoApp:
             # Mostrar mensaje de éxito
             messagebox.showinfo("PDF Generado", "El PDF se generó correctamente.")
 
-        button_frame = tk.Frame(dialog)
-        button_frame.pack(pady=10)
-
-        btn_generar_pdf = tk.Button(button_frame, text="Generar PDF", command=generar_pdf_pedido)
-        btn_generar_pdf.pack(side=tk.LEFT, padx=10, pady=5)  # Ubicar a la izquierda con un espaciado
-
-        # Hacer que el cuadro de diálogo se adapte a su contenido
-        dialog.update_idletasks()
-        dialog.geometry(f"{dialog.winfo_reqwidth()}x{dialog.winfo_reqheight()}")
-        dialog.mainloop()
 
     def generar_pedido_img(self, items_a_imprimir):
     # Obtener el nombre del cliente seleccionado del Combobox
