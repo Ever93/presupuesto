@@ -459,14 +459,14 @@ class PresupuestoApp:
             filas.append(fila)
 
             # Coordenadas de inicio de la tabla
-            x_start = 50
-            y_start = 600
+        x_start = 50
+        y_start = 600
 
             # Ancho de columna
-            col_width = 100
+        col_width = 100
 
             # Altura de fila
-            row_height = 20
+        row_height = 20
 
             # Dibujar la tabla con bordes en cada celda
         for i, columna in enumerate(columnas):
@@ -475,18 +475,18 @@ class PresupuestoApp:
 
             # Dibujar las filas
             y_offset = y_start - row_height
-            for fila in filas:
-                for i, dato in enumerate(fila):
-                    pdf.drawString(x_start + i * col_width, y_offset, str(dato))
-                    pdf.rect(x_start + i * col_width, y_offset, col_width, row_height)
+        for fila in filas:
+            for i, dato in enumerate(fila):
+                pdf.drawString(x_start + i * col_width, y_offset, str(dato))
+                pdf.rect(x_start + i * col_width, y_offset, col_width, row_height)
 
-                y_offset -= row_height
+            y_offset -= row_height
 
             # Guardar el PDF y cerrar el lienzo
-            pdf.save()
+        pdf.save()
 
             # Mostrar mensaje de éxito
-            messagebox.showinfo("PDF Generado", "El PDF se generó correctamente.")
+        messagebox.showinfo("PDF Generado", "El PDF se generó correctamente.")
 
 
     def generar_pedido_img(self, items_a_imprimir):
