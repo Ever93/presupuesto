@@ -15,6 +15,7 @@ from tkinter import simpledialog
 from PIL import Image, ImageDraw, ImageFont
 
 
+
 def conectar():
     conn = sqlite3.connect('crm.db')
     c = conn.cursor()
@@ -464,21 +465,48 @@ class PresupuestoApp:
 
             # Ancho de columna
         col_width = 100
+        
+        # Ancho de columna para la columna "Producto"
+        col_width_producto = 120
 
             # Altura de fila
         row_height = 20
+        # Ancho de línea para los bordes de las celdas
+        border_width = 0.05
 
             # Dibujar la tabla con bordes en cada celda
+        pdf.setLineWidth(border_width) 
         for i, columna in enumerate(columnas):
-            pdf.drawString(x_start + i * col_width, y_start, columna)
-            pdf.rect(x_start + i * col_width, y_start, col_width, row_height)
+            pdf.setFont("Helvetica-Bold", 12)  # Cambiar la fuente a Arial
+            if i == 1:  # Índice 1 corresponde a la columna "Cantidad"
+                col_width_actual = col_width_producto
+            else:
+                col_width_actual = col_width
+            x_centered = x_start + i * col_width_actual + col_width_actual / 2 - pdf.stringWidth(columna, "Helvetica-Bold", 12) / 2
+            y_centered = y_start - row_height / 2 - 6  # 6 es un ajuste para centrar en el medio de la celda
+            pdf.drawCentredString(x_centered, y_centered, columna)
+            pdf.rect(x_start + i * col_width_actual, y_start - row_height, col_width_actual, row_height)
 
             # Dibujar las filas
-            y_offset = y_start - row_height
+        y_offset = y_start - row_height
         for fila in filas:
             for i, dato in enumerate(fila):
-                pdf.drawString(x_start + i * col_width, y_offset, str(dato))
-                pdf.rect(x_start + i * col_width, y_offset, col_width, row_height)
+                pdf.setFont("Helvetica-Bold", 12)  # Cambiar la fuente a Arial
+                # Calcular el ancho de columna adecuado para las columnas "Cantidad" y "Producto"
+                if i == 1:  # Índice 1 corresponde a la columna "Cantidad"
+                    col_width_actual = col_width_producto
+                else:
+                    col_width_actual = col_width
+                x_centered = x_start + i * col_width + col_width / 2 - pdf.stringWidth(str(dato), "Helvetica-Bold", 12) / 2
+        # Calcular la posición Y para centrar el texto verticalmente en la celda
+                y_centered = y_offset - row_height / 2 - 6  # 6 es un ajuste para centrar en el medio de la celda
+                pdf.drawCentredString(x_centered, y_centered, str(dato))
+                pdf.rect(x_start + i * col_width, y_offset - row_height, col_width, row_height)
+
+    # Dibujar los bordes internos de las celdas
+            pdf.rect(x_start, y_offset - row_height, col_width * len(columnas), row_height)
+
+
 
             y_offset -= row_height
 
