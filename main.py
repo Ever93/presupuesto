@@ -13,6 +13,10 @@ import decimal
 import re
 from tkinter import simpledialog
 from PIL import Image, ImageDraw, ImageFont
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib import colors
 
 
 
@@ -431,26 +435,26 @@ class PresupuestoApp:
         if not file_path:
                 # El usuario canceló la selección o no ingresó un nombre de archivo
             return
-            # Crear el lienzo del PDF
-        pdf = canvas.Canvas(file_path, pagesize=letter)
-            # Configuración de fuentes
-        pdf.setFont("Times-Bold", 14)
-        pdf.setFont("Times-Bold", 12)
 
-            # Título
-        pdf.drawCentredString(300, 700, "Pedido")
+         # Crear el lienzo del PDF
+        doc = SimpleDocTemplate(file_path, pagesize=letter)
+        elements = []
 
-            # Proveedor
-        pdf.setFont("Times-Bold", 12)
-        pdf.drawString(50, 650, f"Proveedor: {proveedor}")
-            
-            # Subtítulo Productos Seleccionados
-        pdf.setFont("Times-Bold", 12)
-        pdf.drawString(50, 620, "Productos")
+    # Estilo para el título del PDF
+        styles = getSampleStyleSheet()
+        title_style = styles['Title']
+        title = Paragraph("Pedido", title_style)
+        elements.append(title)
 
-            # Datos para la tabla
+    # Proveedor
+        elements.append(Paragraph(f"Proveedor: {proveedor}", styles['Heading1']))
+    
+    # Subtítulo Productos Seleccionados
+        elements.append(Paragraph("Productos", styles['Heading2']))
+
+    # Datos para la tabla
         columnas = ('Codigo', 'Cantidad', 'Producto')
-        filas = []
+        filas = [columnas]  # Agregar el encabezado de la tabla a las filas
 
         for item in items_a_imprimir_pedido:
             codigo = item[0]
@@ -459,84 +463,28 @@ class PresupuestoApp:
             fila = (codigo, cantidad, producto)
             filas.append(fila)
 
-            # Coordenadas de inicio de la tabla
-        x_start = 50
-        y_start = 600
+    # Estilo de la tabla
+        style = TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),  # Encabezado con fondo gris
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),  # Texto del encabezado en blanco
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),  # Alinear contenido al centro
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),  # Fuente en negrita para el encabezado
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),  # Espaciado inferior para el encabezado
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),  # Fondo beige para el contenido
+        ])
 
-        # Ancho de columna
-        col_width_codigo = 70
-        col_width_cantidad = 70
-        col_width_producto = 200
+    # Crear la tabla
+        table = Table(filas, colWidths=[100, 100, 200], rowHeights=30)
+        table.setStyle(style)
 
-            # Altura de fila
-        row_height = 20
-        # Ancho de línea para los bordes de las celdas
-        border_width = 0.05
+    # Agregar la tabla al documento
+        elements.append(table)
 
-       ## Dibujar las columnas de la tabla con bordes en cada celda
-        pdf.setLineWidth(border_width)
-        y_offset = y_start - row_height  # Inicializar la posición Y
-        
-        
-        for i, columna in enumerate(columnas):
-            pdf.setFont("Helvetica-Bold", 12)  # Cambiar la fuente a Arial   
-            if i == 0:  # Índice 0 corresponde a la columna "Código"
-                col_width_actual = col_width_codigo
-                x_start_col = x_start
-            elif i == 1:  # Índice 1 corresponde a la columna "Cantidad"
-                col_width_actual = col_width_cantidad
-                x_start_col = x_start + col_width_codigo
-            else:
-                col_width_actual = col_width_producto
-                x_start_col = x_start + col_width_codigo + col_width_cantidad
-                
-            x_start_col = x_start + sum(col_width_actual for col_width_actual in (col_width_codigo, col_width_cantidad, col_width_producto)[:i])
-            x_centered = x_start_col + col_width_actual / 2 - pdf.stringWidth(columna, "Helvetica-Bold", 12) / 2
-            y_centered = y_offset - row_height / 2 - 6  # 6 es un ajuste para centrar en el medio de la celda
+    # Compilar y guardar el PDF
+        doc.build(elements)
 
-            pdf.drawCentredString(x_centered, y_centered, columna)
-
-    # Dibujar bordes de las celdas
-            pdf.line(x_start_col, y_offset, x_start_col + col_width_actual, y_offset)  # Borde superior
-            pdf.line(x_start_col, y_offset - row_height, x_start_col + col_width_actual, y_offset - row_height)  # Borde inferior
-  # Borde derecho
-# Dibujar las filas y el contenido de la tabla
-        y_offset -= row_height  # Moverse a la siguiente fila
-        
-        for fila in filas:
-            for j, dato in enumerate(fila):
-                pdf.setFont("Helvetica", 12)  # Cambiar la fuente a Arial
-                
-                if j == 0:
-                    col_width_actual = col_width_codigo
-                    x_start_col = x_start
-                elif j == 1:
-                    col_width_actual = col_width_cantidad
-                    x_start_col = x_start + col_width_codigo
-                else:
-                    col_width_actual = col_width_producto
-                    x_start_col = x_start + col_width_codigo + col_width_cantidad
-                    
-                x_centered = x_start_col + col_width_actual / 2 - pdf.stringWidth(str(dato), "Helvetica", 12) / 2
-                y_centered = y_offset - row_height / 2 - 6  # 6 es un ajuste para centrar en el medio de la celda
-
-                pdf.drawCentredString(x_centered, y_centered, str(dato))
-        # Dibujar bordes de las celdas
-                pdf.line(x_start_col, y_offset, x_start_col, y_offset - row_height)  # Borde izquierdo
-                pdf.line(x_start_col + col_width_actual, y_offset, x_start_col + col_width_actual, y_offset - row_height)  # Borde derecho
-
-    # Moverse a la siguiente fila
-            y_offset -= row_height
-
-# Dibujar borde inferior de la tabla
-        pdf.rect(x_start, y_offset, sum((col_width_codigo, col_width_cantidad, col_width_producto)), row_height)
-
-            # Guardar el PDF y cerrar el lienzo
-        pdf.save()
-
-            # Mostrar mensaje de éxito
+    # Mostrar mensaje de éxito
         messagebox.showinfo("PDF Generado", "El PDF se generó correctamente.")
-
 
     def generar_pedido_img(self, items_a_imprimir):
     # Obtener el nombre del cliente seleccionado del Combobox
@@ -556,6 +504,8 @@ class PresupuestoApp:
         # El usuario canceló la selección o no ingresó un nombre de archivo
             return
 
+        
+        
     # Crear la imagen
         img = Image.new('RGB', (400, 200), color=(255, 255, 255))
         draw = ImageDraw.Draw(img)
