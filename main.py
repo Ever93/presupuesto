@@ -351,7 +351,6 @@ class PresupuestoApp:
                     self.tree.insert('', END, values=(codigo_val, cantidad_val, producto_val, costo_total_guarani_str, ''))
             # Actualizar el total
                 self.actualizar_total()
-            # Cerrar la ventana
                 top.destroy()
 
             btn_cargar = Button(top, text='Cargar', command=cargar)
@@ -412,47 +411,39 @@ class PresupuestoApp:
 
         btn_generar_pdf = tk.Button(button_frame, text="Generar PDF", command=generar_pedido)
         btn_generar_pdf.pack(side=tk.LEFT, padx=10, pady=5)  # Ubicar a la izquierda con un espaciado
-
         # Hacer que el cuadro de diálogo se adapte a su contenido
         dialog.update_idletasks()
         dialog.geometry(f"{dialog.winfo_reqwidth()}x{dialog.winfo_reqheight()}")
         dialog.mainloop()
 
     def generar_pedido_clicked_with_items(self, items_a_imprimir_pedido):
-            # Obtener el nombre del cliente seleccionado del Combobox
+        # Obtener el nombre del cliente seleccionado del Combobox
         cliente = self.combo_cliente.get()
         proveedor = self.combo_proveedor.get()
-            # Obtener la fecha actual
-        fecha_actual = datetime.datetime.now().strftime("%d_%m_%y")
-            # Sugerir el nombre de archivo con el título "Pedido" y la fecha actual
+        fecha_actual = datetime.datetime.now().strftime("%d_%m_%y")  # Obtener la fecha actual
+        # Sugerir el nombre de archivo con el título "Pedido" y la fecha actual
         nombre_archivo_sugerido = f"Pedido_{cliente}_{fecha_actual}.pdf"
-
-            # Solicitar la ubicación y el nombre del archivo
+        # Solicitar la ubicación y el nombre del archivo
         file_path = filedialog.asksaveasfilename(
             defaultextension=".pdf", filetypes=[("PDF Files", "*.pdf")], initialfile=nombre_archivo_sugerido
         )
-
         if not file_path:
-                # El usuario canceló la selección o no ingresó un nombre de archivo
+            # El usuario canceló la selección o no ingresó un nombre de archivo
             return
-
-         # Crear el lienzo del PDF
+        # Crear el lienzo del PDF
         doc = SimpleDocTemplate(file_path, pagesize=letter)
         elements = []
-
-    # Estilo para el título del PDF
+        # Estilo para el título del PDF
         styles = getSampleStyleSheet()
         title_style = styles['Title']
         title = Paragraph("Pedido", title_style)
         elements.append(title)
 
-    # Proveedor
+        # Proveedor
         elements.append(Paragraph(f"Proveedor: {proveedor}", styles['Heading1']))
-    
-    # Subtítulo Productos Seleccionados
+        # Subtítulo Productos Seleccionados
         elements.append(Paragraph("Productos", styles['Heading2']))
-
-    # Datos para la tabla
+        # Datos para la tabla
         columnas = ('Codigo', 'Cantidad', 'Producto')
         filas = [columnas]  # Agregar el encabezado de la tabla a las filas
 
@@ -463,7 +454,7 @@ class PresupuestoApp:
             fila = (codigo, cantidad, producto)
             filas.append(fila)
 
-    # Estilo de la tabla
+        # Estilo de la tabla
         style = TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.grey),  # Encabezado con fondo gris
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),  # Texto del encabezado en blanco
@@ -472,18 +463,14 @@ class PresupuestoApp:
             ('BOTTOMPADDING', (0, 0), (-1, 0), 12),  # Espaciado inferior para el encabezado
             ('BACKGROUND', (0, 1), (-1, -1), colors.beige),  # Fondo beige para el contenido
         ])
-
-    # Crear la tabla
+        # Crear la tabla
         table = Table(filas, colWidths=[100, 100, 200], rowHeights=30)
         table.setStyle(style)
-
-    # Agregar la tabla al documento
+        # Agregar la tabla al documento
         elements.append(table)
-
-    # Compilar y guardar el PDF
+        # Compilar y guardar el PDF
         doc.build(elements)
-
-    # Mostrar mensaje de éxito
+        # Mostrar mensaje de éxito
         messagebox.showinfo("PDF Generado", "El PDF se generó correctamente.")
 
     def generar_pedido_img(self, items_a_imprimir):
@@ -491,10 +478,8 @@ class PresupuestoApp:
         cliente = self.combo.get()
     # Obtener la fecha actual
         fecha_actual = datetime.datetime.now().strftime("%Y-%m-%d")
-
     # Sugerir el nombre de archivo con el título "Pedido" y el nombre del cliente y fecha actual
         nombre_archivo_sugerido = f"Pedido_{cliente}_{fecha_actual}.png"
-
     # Solicitar la ubicación y el nombre del archivo
         file_path = filedialog.asksaveasfilename(
             defaultextension=".png", filetypes=[("PNG Files", "*.png")], initialfile=nombre_archivo_sugerido
@@ -503,9 +488,7 @@ class PresupuestoApp:
         if not file_path:
         # El usuario canceló la selección o no ingresó un nombre de archivo
             return
-
-        
-        
+ 
     # Crear la imagen
         img = Image.new('RGB', (400, 200), color=(255, 255, 255))
         draw = ImageDraw.Draw(img)
@@ -525,11 +508,8 @@ class PresupuestoApp:
         messagebox.showinfo("Imagen Generada", "La imagen se generó correctamente.")
 
     def generar_presupuesto_clicked(self):
-        # Obtener el nombre del cliente seleccionado del Combobox
-        #cliente = self.combo.get()
         # Mostrar el cuadro de diálogo para seleccionar los elementos a incluir en el PDF
         items_a_imprimir = self.mostrar_cuadro_dialogo_items()
-
         if items_a_imprimir is None:
         # Si el usuario cancela el cuadro de diálogo, no se genera el PDF
             return
