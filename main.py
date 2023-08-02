@@ -463,52 +463,73 @@ class PresupuestoApp:
         x_start = 50
         y_start = 600
 
-            # Ancho de columna
-        col_width = 100
-        
-        # Ancho de columna para la columna "Producto"
-        col_width_producto = 120
+        # Ancho de columna
+        col_width_codigo = 70
+        col_width_cantidad = 70
+        col_width_producto = 200
 
             # Altura de fila
         row_height = 20
         # Ancho de línea para los bordes de las celdas
         border_width = 0.05
 
-            # Dibujar la tabla con bordes en cada celda
-        pdf.setLineWidth(border_width) 
+       ## Dibujar las columnas de la tabla con bordes en cada celda
+        pdf.setLineWidth(border_width)
+        y_offset = y_start - row_height  # Inicializar la posición Y
+        
+        
         for i, columna in enumerate(columnas):
-            pdf.setFont("Helvetica-Bold", 12)  # Cambiar la fuente a Arial
-            if i == 1:  # Índice 1 corresponde a la columna "Cantidad"
-                col_width_actual = col_width_producto
+            pdf.setFont("Helvetica-Bold", 12)  # Cambiar la fuente a Arial   
+            if i == 0:  # Índice 0 corresponde a la columna "Código"
+                col_width_actual = col_width_codigo
+                x_start_col = x_start
+            elif i == 1:  # Índice 1 corresponde a la columna "Cantidad"
+                col_width_actual = col_width_cantidad
+                x_start_col = x_start + col_width_codigo
             else:
-                col_width_actual = col_width
-            x_centered = x_start + i * col_width_actual + col_width_actual / 2 - pdf.stringWidth(columna, "Helvetica-Bold", 12) / 2
-            y_centered = y_start - row_height / 2 - 6  # 6 es un ajuste para centrar en el medio de la celda
+                col_width_actual = col_width_producto
+                x_start_col = x_start + col_width_codigo + col_width_cantidad
+                
+            x_start_col = x_start + sum(col_width_actual for col_width_actual in (col_width_codigo, col_width_cantidad, col_width_producto)[:i])
+            x_centered = x_start_col + col_width_actual / 2 - pdf.stringWidth(columna, "Helvetica-Bold", 12) / 2
+            y_centered = y_offset - row_height / 2 - 6  # 6 es un ajuste para centrar en el medio de la celda
+
             pdf.drawCentredString(x_centered, y_centered, columna)
-            pdf.rect(x_start + i * col_width_actual, y_start - row_height, col_width_actual, row_height)
 
-            # Dibujar las filas
-        y_offset = y_start - row_height
+    # Dibujar bordes de las celdas
+            pdf.line(x_start_col, y_offset, x_start_col + col_width_actual, y_offset)  # Borde superior
+            pdf.line(x_start_col, y_offset - row_height, x_start_col + col_width_actual, y_offset - row_height)  # Borde inferior
+  # Borde derecho
+# Dibujar las filas y el contenido de la tabla
+        y_offset -= row_height  # Moverse a la siguiente fila
+        
         for fila in filas:
-            for i, dato in enumerate(fila):
-                pdf.setFont("Helvetica-Bold", 12)  # Cambiar la fuente a Arial
-                # Calcular el ancho de columna adecuado para las columnas "Cantidad" y "Producto"
-                if i == 1:  # Índice 1 corresponde a la columna "Cantidad"
-                    col_width_actual = col_width_producto
+            for j, dato in enumerate(fila):
+                pdf.setFont("Helvetica", 12)  # Cambiar la fuente a Arial
+                
+                if j == 0:
+                    col_width_actual = col_width_codigo
+                    x_start_col = x_start
+                elif j == 1:
+                    col_width_actual = col_width_cantidad
+                    x_start_col = x_start + col_width_codigo
                 else:
-                    col_width_actual = col_width
-                x_centered = x_start + i * col_width + col_width / 2 - pdf.stringWidth(str(dato), "Helvetica-Bold", 12) / 2
-        # Calcular la posición Y para centrar el texto verticalmente en la celda
+                    col_width_actual = col_width_producto
+                    x_start_col = x_start + col_width_codigo + col_width_cantidad
+                    
+                x_centered = x_start_col + col_width_actual / 2 - pdf.stringWidth(str(dato), "Helvetica", 12) / 2
                 y_centered = y_offset - row_height / 2 - 6  # 6 es un ajuste para centrar en el medio de la celda
+
                 pdf.drawCentredString(x_centered, y_centered, str(dato))
-                pdf.rect(x_start + i * col_width, y_offset - row_height, col_width, row_height)
+        # Dibujar bordes de las celdas
+                pdf.line(x_start_col, y_offset, x_start_col, y_offset - row_height)  # Borde izquierdo
+                pdf.line(x_start_col + col_width_actual, y_offset, x_start_col + col_width_actual, y_offset - row_height)  # Borde derecho
 
-    # Dibujar los bordes internos de las celdas
-            pdf.rect(x_start, y_offset - row_height, col_width * len(columnas), row_height)
-
-
-
+    # Moverse a la siguiente fila
             y_offset -= row_height
+
+# Dibujar borde inferior de la tabla
+        pdf.rect(x_start, y_offset, sum((col_width_codigo, col_width_cantidad, col_width_producto)), row_height)
 
             # Guardar el PDF y cerrar el lienzo
         pdf.save()
