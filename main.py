@@ -609,14 +609,14 @@ class PresupuestoApp:
     def actualizar_nombres_clientes(self):
         nombres_clientes = obtener_nombres_clientes()
         self.clientes = [nombre[0] for nombre in nombres_clientes]
-        self.combo['values'] = self.clientes
-        self.combo.current(0)  # Establecer la selección en el primer elemento de la lista
+        self.combo_cliente['values'] = self.clientes
+        self.combo_cliente.current(0)  # Establecer la selección en el primer elemento de la lista
         
     def actualizar_nombres_proveedores(self):
         nombres_proveedores = obtener_nombres_proveedores()
         self.proveedores = [nombre[0] for nombre in nombres_proveedores]
-        self.combo['values'] = self.proveedores
-        self.combo.current(0)
+        self.combo_proveedor['values'] = self.proveedores
+        self.combo_proveedor.current(0)
         
     def actualizar_coincidencias_cliente(self):
         texto_ingresado = self.combo_cliente.get()
