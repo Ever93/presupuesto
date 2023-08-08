@@ -171,18 +171,30 @@ class PresupuestoApp:
         self.observacion_text_label = Label(self.observacion_frame, font=('Times New Roman', 12), text=self.observacion_texto, anchor='w', justify='left')
         self.observacion_text_label.pack(pady=5, padx=5, anchor='w')
 
-        #Label cuotas
-        cuotas_label = Label(self.root, font=('Arial', 12, 'bold'), text='Cuotas corridas:')
-        cuotas_label.pack(anchor='w', padx='20')
-        # Creamos un nuevo frame para las cuotas
-        cuotas_frame = Frame(self.root, bd=1, relief='solid', width=200, height=100)
-        cuotas_frame.pack(pady=10, padx=35, anchor='w', fill='both', expand=True)
-        # Obtener datos cantidad de la base de datos
-        cantidad = self.obtener_datos_cuotas()
-        # Mostrar los datos en el marco de cuotas
-        for cantidad_cuotas in cantidad:
-            label = tk.Label(cuotas_frame, text=f"{cantidad_cuotas} x ")
+        # Frame para cuotas corridas
+        cuotas_corridas_frame = tk.Frame(self.root, bd=1, relief='solid', width=100, height=100)
+        cuotas_corridas_frame.pack(side='left', padx=5, pady=10, anchor='w', fill='both', expand=True)
+
+        cuotas_corridas_label = tk.Label(cuotas_corridas_frame, font=('Arial', 12, 'bold'), text='Cuotas corridas:')
+        cuotas_corridas_label.pack(anchor='w', padx=20)
+
+        cantidad_cuotas_corridas = self.obtener_datos_cuotas()
+        for cantidad_cuotas in cantidad_cuotas_corridas:
+            label = tk.Label(cuotas_corridas_frame, text=f"{cantidad_cuotas} x")
             label.pack(anchor='w')
+
+        # Frame para cuotas con entrega
+        cuotas_entrega_frame = tk.Frame(self.root, bd=1, relief='solid', width=100, height=100)
+        cuotas_entrega_frame.pack(side='left', padx=5, pady=10, anchor='w', fill='both', expand=True)
+
+        cuotas_entrega_label = tk.Label(cuotas_entrega_frame, font=('Arial', 12, 'bold'), text='Cuotas con entrega:')
+        cuotas_entrega_label.pack(anchor='w', padx=20)
+
+        #cantidad_cuotas_entrega = self.obtener_datos_entrega()
+        #for cantidad_entrega in cantidad_cuotas_entrega:
+            #label = Label(cuotas_entrega_frame, text=f"{cantidad_entrega} x")
+            #label.pack(anchor='w')
+
     
         
     def abrir_ventana_observacion(self):
