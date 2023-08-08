@@ -5,6 +5,7 @@ import tkinter as tk
 import subprocess
 from cliente import CRMApp
 from proveedores import ProveedoresApp
+from configCuotas import ConfigCuotasApp
 import locale
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
@@ -69,6 +70,7 @@ class PresupuestoApp:
         options_menu.add_command(label="Cliente", command=self.abrir_ventana_crm)
         options_menu.add_command(label="Proveedores", command=self.abrir_ventana_proveedores)
         options_menu.add_command(label="Empresa", command=self.opcion_empresa)
+        options_menu.add_command(label="Config. Cuotas", command=self.abrir_ventana_cuotas)
 
         menu_bar.add_cascade(label="Archivo", menu=file_menu)
         menu_bar.add_cascade(label="Opciones", menu=options_menu)
@@ -217,6 +219,10 @@ class PresupuestoApp:
 
     def opcion_empresa(self):
         pass
+    
+    def abrir_ventana_cuotas(self):
+        configcuotas_app = ConfigCuotasApp(self)
+        configcuotas_app.mainloop()
     
     def dolar_clicked(self):
         top = tk.Toplevel()
