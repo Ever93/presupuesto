@@ -60,7 +60,7 @@ class PresupuestoApp:
         self.render_clientes()
         self.render_proveedores()
         self.elementos_eliminados = {}
-    
+    #Obtener datos de tabla cuotas
     def obtener_datos_cuotas(self):
         conn, c = conectar()
         c.execute("SELECT cantidadcuotas FROM cuotas")
@@ -172,7 +172,7 @@ class PresupuestoApp:
         self.observacion_text_label.pack(pady=5, padx=5, anchor='w')
 
         #Label cuotas
-        cuotas_label = Label(self.root, font=('Arial', 12, 'bold'), text='Cuotas:')
+        cuotas_label = Label(self.root, font=('Arial', 12, 'bold'), text='Cuotas corridas:')
         cuotas_label.pack(anchor='w', padx='20')
         # Creamos un nuevo frame para las cuotas
         cuotas_frame = Frame(self.root, bd=1, relief='solid', width=200, height=100)
@@ -181,7 +181,7 @@ class PresupuestoApp:
         cantidad = self.obtener_datos_cuotas()
         # Mostrar los datos en el marco de cuotas
         for cantidad_cuotas in cantidad:
-            label = tk.Label(cuotas_frame, text=f"Cantidad de Cuotas: {cantidad_cuotas}")
+            label = tk.Label(cuotas_frame, text=f"{cantidad_cuotas} x ")
             label.pack(anchor='w')
     
         
