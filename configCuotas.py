@@ -63,6 +63,9 @@ class ConfigCuotasApp(Tk):
             # Creamos el main loop para nuestra segunda ventana
             top.mainloop()
 
+        def editar_cuotas():
+            pass
+        
         def eliminar_cuotas():
             id = self.tree.selection()[0]
             cuotas = self.c.execute("SELECT * FROM cuotas where id = ?", (id,)).fetchone()
@@ -77,8 +80,11 @@ class ConfigCuotasApp(Tk):
         btn_nueva_cuota = Button(self, text='Nueva cuota', command=nueva_cuota)
         btn_nueva_cuota.grid(column=0, row=0)
 
+        btn_editar_cuota = Button(self, text='Editar Cuota', command=editar_cuotas)
+        btn_editar_cuota.grid(column=1, row=0)
+
         btn_eliminar_cuota = Button(self, text='Eliminar Cuota', command=eliminar_cuotas)
-        btn_eliminar_cuota.grid(column=1, row=0)
+        btn_eliminar_cuota.grid(column=2, row=0)
 
         self.tree = ttk.Treeview(self)
         self.tree['columns'] = ('cantidadcuotas', 'tasainteres')
