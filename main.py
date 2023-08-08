@@ -590,10 +590,15 @@ class PresupuestoApp:
             pdf.drawString(70, y, producto)
             y -= 20
 
-    # Precio total
+    # Precio total(la x es la distancia del borde vertical y la y es la distancia del borde horizontal)
         pdf.drawString(50, y - 40, "Precio:")
         total = self.total_label.cget("text").split(": ")[1]
-        pdf.drawString(100, y - 40, total + " contado con IVA incluido")
+        pdf.drawString(90, y - 40, total + " contado con IVA incluido")
+    #Observacion
+        observacion_texto = self.observacion_text_label.cget("text")
+        if observacion_texto:
+            pdf.drawString(50, y - 60, observacion_texto)
+
         pdf.save()
     # Mostrar mensaje de éxito
         messagebox.showinfo("PDF Generado", "El PDF se generó correctamente.")
