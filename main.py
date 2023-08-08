@@ -40,6 +40,8 @@ def obtener_nombres_proveedores():
     conn.close()
     return nombres
 
+
+
 # Establecer la configuración local para el separador de miles
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
@@ -58,6 +60,13 @@ class PresupuestoApp:
         self.render_clientes()
         self.render_proveedores()
         self.elementos_eliminados = {}
+    
+    def obtener_datos_cuotas(self):
+        conn, c = conectar()
+        c.execute("SELECT cantidadcuotas FROM cuotas")
+        cantidad = [fila[0] for fila in c.fetchall()]
+        conn.close()
+        return cantidad
 
     def create_menu(self):
         menu_bar = tk.Menu(self.root)
@@ -153,16 +162,29 @@ class PresupuestoApp:
         self.tree.heading('Guarani', text='Guarani')
         self.tree.heading('Dolar', text='Dolar')
         self.tree.pack()
-#Creamos label para cargar observacion
+        #Creamos label para cargar observacion
         observacion_label = Label(self.root, font=('Arial', 12, 'bold'), text='Observación:')
         observacion_label.pack(anchor='w', padx='20')
-
         self.observacion_frame = Frame(self.root, bd=1, relief='solid',  width=200, height=200)  # Ajusta los valores de width y height según tu preferencia
-        self.observacion_frame.pack(pady=1, padx=35, anchor='w', fill='both')    
-#Aqui se muestra el texto cargado en observacion
+        self.observacion_frame.pack(pady=1, padx=35, anchor='w', fill='both', expand=True)    
+        #Aqui se muestra el texto cargado en observacion
         self.observacion_text_label = Label(self.observacion_frame, font=('Times New Roman', 12), text=self.observacion_texto, anchor='w', justify='left')
         self.observacion_text_label.pack(pady=5, padx=5, anchor='w')
-  
+
+        #Label cuotas
+        cuotas_label = Label(self.root, font=('Arial', 12, 'bold'), text='Cuotas:')
+        cuotas_label.pack(anchor='w', padx='20')
+        # Creamos un nuevo frame para las cuotas
+        cuotas_frame = Frame(self.root, bd=1, relief='solid', width=200, height=100)
+        cuotas_frame.pack(pady=10, padx=35, anchor='w', fill='both', expand=True)
+        # Obtener datos cantidad de la base de datos
+        cantidad = self.obtener_datos_cuotas()
+        # Mostrar los datos en el marco de cuotas
+        for cantidad_cuotas in cantidad:
+            label = tk.Label(cuotas_frame, text=f"Cantidad de Cuotas: {cantidad_cuotas}")
+            label.pack(anchor='w')
+    
+        
     def abrir_ventana_observacion(self):
         top = Toplevel()
         top.title('Observación')

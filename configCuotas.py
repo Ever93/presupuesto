@@ -34,6 +34,13 @@ class ConfigCuotasApp(Tk):
                 if not tasainteres.get():
                     messagebox.showerror('Error', 'La tasa de interes es obligatorio')
                     return
+                # Validar que cantidad y tasa sean valores numéricos
+                if not cantidadcuotas.isnumeric():
+                    messagebox.showerror('Error', 'La cantidad de cuotas debe ser un valor numérico')
+                    return
+                if not tasainteres.replace('.', '', 1).isdigit():
+                    messagebox.showerror('Error', 'La tasa de interés debe ser un valor numérico')
+                    return
 
                 cuotas = {
                     'cantidadcuotas': cantidadcuotas.get(),
