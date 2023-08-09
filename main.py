@@ -165,9 +165,10 @@ class PresupuestoApp:
         #Creamos label para cargar observacion
         observacion_label = Label(self.root, font=('Arial', 12, 'bold'), text='Observación:')
         observacion_label.pack(anchor='w', padx='20')
+
         self.observacion_frame = Frame(self.root, bd=1, relief='solid',  width=200, height=200)  # Ajusta los valores de width y height según tu preferencia
-        self.observacion_frame.pack(pady=1, padx=35, anchor='w', fill='both', expand=True)    
-        #Aqui se muestra el texto cargado en observacion
+        self.observacion_frame.pack(pady=1, padx=35, anchor='w', fill='both')    
+#Aqui se muestra el texto cargado en observacion
         self.observacion_text_label = Label(self.observacion_frame, font=('Times New Roman', 12), text=self.observacion_texto, anchor='w', justify='left')
         self.observacion_text_label.pack(pady=5, padx=5, anchor='w')
 
