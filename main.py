@@ -189,7 +189,10 @@ class PresupuestoApp:
         cuotas_entrega_frame.pack(side='left', padx=5, pady=10, anchor='w', fill='both', expand=True)
 
         cuotas_entrega_label = tk.Label(cuotas_entrega_frame, font=('Arial', 12, 'bold'), text='Cuotas con entrega:')
-        cuotas_entrega_label.pack(anchor='w', padx=20)
+        boton_calcular = tk.Button(cuotas_entrega_frame, text="Calcular", command="")#calcular_cuotas_entrega
+
+        cuotas_entrega_label.pack(side='left', padx=20)
+        boton_calcular.pack(side='left', padx=20)
 
         #cantidad_cuotas_entrega = self.obtener_datos_entrega()
         #for cantidad_entrega in cantidad_cuotas_entrega:
